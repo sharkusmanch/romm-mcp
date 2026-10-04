@@ -109,6 +109,12 @@ def test_catalog_rejects_encoded_and_control_literal_paths(path):
         ("get", "/api/memory-cards/{id}/versions", {"writes"}),
         ("get", "/api/tasks/status", {"writes", "tasks"}),
         ("get", "/api/tasks", {"tasks"}),
+        ("post", "/api/platforms", {"files"}),
+        ("post", "/api/roms/{id}/convert-to-folder", {"files"}),
+        ("delete", "/api/roms/{rom_id}/files/{file_id}", {"files"}),
+        ("post", "/api/roms/delete", {"files"}),
+        ("post", "/api/saves/delete", {"files"}),
+        ("post", "/api/memory-cards/delete", {"files"}),
         ("post", "/api/memory-cards/{id}/versions", {"writes", "files"}),
     ],
 )

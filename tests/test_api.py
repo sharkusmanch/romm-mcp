@@ -325,3 +325,103 @@ async def test_nullable_form_fields_never_become_literal_none(mime):
         assert calls == []
     finally:
         a.close()
+
+
+async def test_concurrent_auth_sessions_enforce_cap_and_serialize_cookie_updates():
+    import asyncio
+
+    active = peak = 0
+
+    async def handler(request):
+        nonlocal active, peak
+        active += 1
+        peak = max(peak, active)
+        await asyncio.sleep(0.01)
+        active -= 1
+        return httpx.Response(200, json={})
+
+    a = api(handler)
+    try:
+        results = await asyncio.gather(
+            *(
+                a.call("test", APIRequest(path={"id": "login"}, auth_session="new"))
+                for _ in range(12)
+            ),
+            return_exceptions=True,
+        )
+        assert len(a.sessions) == 8
+        assert sum(isinstance(r, ToolError) for r in results) == 4
+        assert peak == 1
+    finally:
+        a.close()
+
+
+def test_paginated_truncation_paths_select_the_original_item():
+    rows = [{"text": str(i) + "x" * 2100} for i in range(30)]
+    page = bounded(rows, offset=20, limit=1)
+    assert page["truncated_paths"] == ["/20/text"]
+    detail = bounded(rows, pointer=page["truncated_paths"][0])
+    assert detail["data"] == rows[20]["text"]
+
+
+@pytest.mark.parametrize("method", ["get", "head"])
+async def test_hidden_folder_download_query_is_supported(method):
+    def handler(request):
+        assert request.url.params["hidden_folder"] == "true"
+        return httpx.Response(204)
+
+    a = FullAPI(config(), transport=httpx.MockTransport(handler))
+    a._catalog = Catalog(
+        {"paths": {"/api/roms/{id}/content/{file_name}": {method: {"operationId": "content"}}}},
+        a.settings,
+    )
+    try:
+        result = await a.call(
+            "content",
+            APIRequest(path={"id": 1, "file_name": "game.zip"}, query={"hidden_folder": True}),
+        )
+        assert result["status_code"] == 204
+    finally:
+        a.close()
+
+
+async def test_concurrent_logout_does_not_restore_stale_cookie():
+    import asyncio
+
+    entered = asyncio.Event()
+    release = asyncio.Event()
+    observed = []
+
+    async def handler(request):
+        action = request.url.path.rsplit("/", 1)[-1]
+        observed.append((action, request.headers.get("cookie", "")))
+        if action == "login":
+            return httpx.Response(200, json={}, headers={"set-cookie": "session=test; Path=/"})
+        if action == "slow":
+            entered.set()
+            await release.wait()
+        if action == "logout":
+            return httpx.Response(
+                200, json={}, headers={"set-cookie": "session=; Path=/; Max-Age=0"}
+            )
+        return httpx.Response(200, json={})
+
+    a = api(handler)
+    try:
+        login = await a.call("test", APIRequest(path={"id": "login"}, auth_session="new"))
+        handle = login["auth_session"]
+
+        def request(action):
+            return APIRequest(path={"id": action}, auth_mode="session", auth_session=handle)
+
+        slow = asyncio.create_task(a.call("test", request("slow")))
+        await entered.wait()
+        logout = asyncio.create_task(a.call("test", request("logout")))
+        await asyncio.sleep(0.02)
+        release.set()
+        await asyncio.gather(slow, logout)
+        await a.call("test", request("after"))
+        assert observed[-1] == ("after", "")
+    finally:
+        release.set()
+        a.close()

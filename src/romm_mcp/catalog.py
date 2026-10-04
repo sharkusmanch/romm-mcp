@@ -54,6 +54,16 @@ class Catalog:
                     raise ToolError("Duplicate OpenAPI operation ID.")
                 merged = dict(spec)
                 merged["parameters"] = item.get("parameters", []) + spec.get("parameters", [])
+                if path == "/api/roms/{id}/content/{file_name}" and method in ("get", "head"):
+                    if not any(p.get("name") == "hidden_folder" for p in merged["parameters"]):
+                        merged["parameters"].append(
+                            {
+                                "name": "hidden_folder",
+                                "in": "query",
+                                "schema": {"type": "boolean"},
+                                "description": "Use the muOS hidden multi-disc folder layout.",
+                            }
+                        )
                 self.operations[key] = Operation(key, method, path, merged)
 
     def get(self, operation_id):
@@ -132,6 +142,24 @@ class Catalog:
             or DYNAMIC_UPLOAD.fullmatch(p)
             and m == "post"
             or p.endswith("/patch")
+        ):
+            gates.add("files")
+        file_family = p.startswith(
+            (
+                "/api/roms/",
+                "/api/saves",
+                "/api/states",
+                "/api/screenshots",
+                "/api/firmware",
+                "/api/memory-cards",
+            )
+        )
+        if (
+            file_family
+            and (m == "delete" or p.endswith("/delete"))
+            or p.endswith("/convert-to-folder")
+            or (p == "/api/platforms" and m == "post")
+            or p.startswith("/api/tasks/run/")
         ):
             gates.add("files")
         if DYNAMIC_UPLOAD.fullmatch(p) and m == "post":

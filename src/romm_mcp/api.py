@@ -110,14 +110,17 @@ def bounded(value, pointer="", offset=0, limit=20):
             }
         return item
 
-    data = trim(data, pointer)
+    if isinstance(data, list):
+        data = [trim(v, pointer + "/" + str(offset + i), 1) for i, v in enumerate(data)]
+    else:
+        data = trim(data, pointer)
     encoded = json.dumps(data, ensure_ascii=True, separators=(",", ":"))
     if len(encoded) > 16000:
         data = {
             "preview_json": encoded[:12000],
             "hint": "Select a narrower response_pointer or smaller limit.",
         }
-        truncated.append(pointer or "/")
+        truncated.append(pointer)
     return {
         "data": data,
         "response_pointer": pointer,
@@ -134,6 +137,7 @@ class FullAPI:
         self.transport = transport
         self._catalog = None
         self._schema_lock = asyncio.Lock()
+        self._auth_lock = asyncio.Lock()
         self.artifacts = ArtifactStore(settings.transfer_directory, settings.max_transfer_bytes)
         self.sessions = {}
 
@@ -282,6 +286,13 @@ class FullAPI:
         return path.lstrip("/"), headers, params
 
     async def call(self, operation_id, request, *, write=False):
+        # Serialize cookie flows: quota checks and jar copy/request/store are atomic.
+        if request.auth_session or request.auth_mode == "session":
+            async with self._auth_lock:
+                return await self._call(operation_id, request, write=write)
+        return await self._call(operation_id, request, write=write)
+
+    async def _call(self, operation_id, request, *, write=False):
         catalog = await self.catalog()
         op = catalog.get(operation_id)
         extra = set()
