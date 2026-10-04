@@ -156,6 +156,7 @@ class Catalog:
         )
         if (
             file_family
+            and p != "/api/roms/{id}/notes/{note_id}"
             and (m == "delete" or p.endswith("/delete"))
             or p.endswith("/convert-to-folder")
             or (p == "/api/platforms" and m == "post")
