@@ -46,4 +46,5 @@ async def test_registration_readonly_and_typed_bounded_schema():
     assert search.annotations.read_only_hint
     rw = await create_server(settings(allow_writes=True)).list_tools()
     assert len(rw) == 14
+    assert all(t.output_schema for t in rw)
     assert not next(t for t in rw if t.name == "update_collection_roms").annotations.read_only_hint

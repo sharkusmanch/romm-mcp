@@ -177,12 +177,12 @@ uv run romm-mcp --transport http --host 127.0.0.1 --port 8080
 docker run --rm --read-only --tmpfs /tmp:rw,nosuid,nodev,size=80m \
   -p 127.0.0.1:8080:8080 \
   -e ROMM_URL -e ROMM_TOKEN -e MCP_AUTH_TOKEN -e MCP_ALLOWED_HOSTS \
-  ghcr.io/sharkusmanch/romm-mcp:v0.2.0
+  ghcr.io/sharkusmanch/romm-mcp:v0.2.1
 
 # Container as a local stdio server:
 docker run --rm -i --read-only --tmpfs /tmp:rw,nosuid,nodev,size=80m \
   -e ROMM_URL -e ROMM_TOKEN \
-  ghcr.io/sharkusmanch/romm-mcp:v0.2.0 --transport stdio
+  ghcr.io/sharkusmanch/romm-mcp:v0.2.1 --transport stdio
 ```
 
 Pass the desired `ROMM_ALLOW_*` variables into the container explicitly with `-e`.
@@ -219,6 +219,9 @@ separate flags. `status: null` clears status. Ratings/difficulty range 0–10;
 completion ranges 0–100. Private collection names are checked per owner to reduce
 accidental duplicates.
 
+Removing collection membership requires writes; deleting the collection itself also
+requires destructive access. Generic tools return structured MCP results.
+
 Generic HTTP mutations report **`verification: "not_performed"`**. HTTP success does
 not prove the intended state, so independently read it back when needed. Neither
 interface automatically retries writes. Transport ambiguity or failed compact
@@ -245,7 +248,7 @@ must match the package version. Tags publish amd64/arm64 images, per-platform
 BuildKit SBOMs, GitHub-signed provenance as OCI referrers, and attested Python archives.
 
 ```sh
-gh attestation verify oci://ghcr.io/sharkusmanch/romm-mcp:v0.2.0 \
+gh attestation verify oci://ghcr.io/sharkusmanch/romm-mcp:v0.2.1 \
   --repo sharkusmanch/romm-mcp
 ```
 

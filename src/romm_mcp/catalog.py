@@ -101,7 +101,11 @@ class Catalog:
         gates = set()
         if self.is_write(op, query):
             gates.add("writes")
-        if m == "delete" or p.endswith("/delete") or "/regenerate" in p:
+        if (
+            (m == "delete" and p != "/api/collections/{id}/roms")
+            or p.endswith("/delete")
+            or "/regenerate" in p
+        ):
             gates |= {"writes", "destructive"}
         if tags & {"auth", "device-auth", "client-tokens"} or p.startswith("/api/auth/"):
             gates.add("auth")
