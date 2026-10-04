@@ -20,12 +20,35 @@ from mcp.client.streamable_http import streamable_http_client
 @pytest.fixture
 def upstream():
     class Handler(BaseHTTPRequestHandler):
+        members = {42, 43}
+
+        def do_POST(self):
+            assert self.path == "/api/test"
+            self.send_response(204)
+            self.end_headers()
+
+        def do_DELETE(self):
+            assert self.path == "/api/collections/501/roms"
+            body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+            self.members.difference_update(body["rom_ids"])
+            self.send_response(204)
+            self.end_headers()
+
         def log_message(self, *args):
             pass
 
         def do_GET(self):
             assert self.headers["Authorization"] == "Bearer upstream-secret"
             data = {"items": [{"id": 42, "name": "Test ROM", "platform_id": 2}], "total": 1}
+            if self.path == "/openapi.json":
+                data = {
+                    "paths": {
+                        "/api/roms": {"get": {"operationId": "roms"}},
+                        "/api/test": {"post": {"operationId": "noop"}},
+                    }
+                }
+            elif self.path == "/api/collections/501":
+                data = {"id": 501, "name": "Test", "rom_ids": sorted(self.members)}
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
@@ -48,6 +71,22 @@ async def verify(session):
     assert not result.is_error
     assert result.structured_content["items"][0]["id"] == 42
     assert result.structured_content["next_offset"] is None
+    for name, args in [
+        ("romm_api_list", {}),
+        ("romm_api_describe", {"operation_id": "roms"}),
+        ("romm_api_read", {"operation_id": "roms"}),
+        ("romm_api_write", {"operation_id": "noop"}),
+        ("romm_socket", {"action": "catalog"}),
+    ]:
+        generic = await session.call_tool(name, args)
+        assert not generic.is_error
+        assert generic.structured_content is not None, name
+    removed = await session.call_tool(
+        "update_collection_roms", {"collection_id": 501, "rom_ids": [42], "operation": "remove"}
+    )
+    assert not removed.is_error
+    assert removed.structured_content["verified"]
+    assert removed.structured_content["collection"]["rom_count"] == 1
     invalid = await session.call_tool("search_roms", {"limit": 101})
     assert invalid.is_error
 

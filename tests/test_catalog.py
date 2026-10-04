@@ -132,3 +132,13 @@ def test_deleting_text_notes_does_not_require_file_access():
         if x.method == "delete" and x.path == "/api/roms/{id}/notes/{note_id}"
     )
     assert set(c.requirements(op)) == {"writes", "destructive"}
+
+
+def test_collection_membership_removal_requires_only_writes():
+    c = Catalog(inventory(), settings())
+    op = next(
+        x
+        for x in c.operations.values()
+        if x.method == "delete" and x.path == "/api/collections/{id}/roms"
+    )
+    assert c.requirements(op) == ["writes"]
