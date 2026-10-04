@@ -122,3 +122,13 @@ def test_adversarial_source_semantics_require_all_gates(method, path, gates):
     c = Catalog(inventory(), settings())
     op = next(x for x in c.operations.values() if x.method == method and x.path == path)
     assert gates <= set(c.requirements(op))
+
+
+def test_deleting_text_notes_does_not_require_file_access():
+    c = Catalog(inventory(), settings())
+    op = next(
+        x
+        for x in c.operations.values()
+        if x.method == "delete" and x.path == "/api/roms/{id}/notes/{note_id}"
+    )
+    assert set(c.requirements(op)) == {"writes", "destructive"}
