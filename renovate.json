@@ -1,0 +1,18 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    "docker:pinDigests",
+    ":maintainLockFilesWeekly"
+  ],
+  "timezone": "Etc/UTC",
+  "automerge": false,
+  "packageRules": [
+    {
+      "description": "Keep the uv executable in CI and the build image together.",
+      "matchPackageNames": ["astral-sh/uv", "ghcr.io/astral-sh/uv"],
+      "groupName": "uv"
+    }
+  ]
+}

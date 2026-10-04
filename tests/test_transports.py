@@ -43,7 +43,7 @@ def upstream():
 async def verify(session):
     await session.initialize()
     tools = await session.list_tools()
-    assert len(tools.tools) == 8
+    assert len(tools.tools) == 14
     result = await session.call_tool("search_roms", {"query": "Test", "limit": 1})
     assert not result.is_error
     assert result.structured_content["items"][0]["id"] == 42

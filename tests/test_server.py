@@ -39,11 +39,11 @@ def test_http_health_auth_and_origin():
 async def test_registration_readonly_and_typed_bounded_schema():
     mcp = create_server(settings())
     tools = await mcp.list_tools()
-    assert len(tools) == 5
+    assert len(tools) == 10
     search = next(t for t in tools if t.name == "search_roms")
     assert search.input_schema["properties"]["limit"]["maximum"] == 100
     assert search.output_schema
     assert search.annotations.read_only_hint
     rw = await create_server(settings(allow_writes=True)).list_tools()
-    assert len(rw) == 8
+    assert len(rw) == 14
     assert not next(t for t in rw if t.name == "update_collection_roms").annotations.read_only_hint

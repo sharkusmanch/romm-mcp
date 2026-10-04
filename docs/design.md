@@ -1,5 +1,7 @@
 # RomM MCP design
 
+> Historical v0.1.0 scope, superseded by [full-api-design.md](full-api-design.md).
+
 Build an independent MIT-licensed Python server with the official MCP 2.3 SDK,
 httpx and Pydantic. Default local transport is stdio; HTTP is stateless Streamable
 HTTP on /mcp, with explicit host/origin validation and a dedicated bearer token.

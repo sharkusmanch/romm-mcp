@@ -1,5 +1,7 @@
 # RomM MCP implementation plan
 
+> Historical v0.1.0 scope, superseded by [full-api-design.md](full-api-design.md).
+
 Goal: researched, reviewed server published and running in the cluster, usable by both games clients.
 Spec: design.md. Execution: autonomous native implementation with independent subagent review.
 

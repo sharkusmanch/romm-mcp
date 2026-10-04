@@ -1,10 +1,18 @@
 [project]
 name = "romm-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "A compact, typed RomM MCP server for stdio and Streamable HTTP"
 requires-python = ">=3.12"
 license = "MIT"
-dependencies = ["mcp==2.3.0", "httpx>=0.28.1,<1", "pydantic>=2.11,<3", "uvicorn>=0.35,<1"]
+dependencies = [
+    "mcp==2.3.0",
+    "httpx>=0.28.1,<1",
+    "jsonschema>=4.23,<5",
+    "referencing>=0.36,<1",
+    "pydantic>=2.11,<3",
+    "uvicorn>=0.35,<1",
+    "python-socketio[asyncio-client]>=5.14,<6",
+]
 
 [project.scripts]
 romm-mcp = "romm_mcp.server:main"
