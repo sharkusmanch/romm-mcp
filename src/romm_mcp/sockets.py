@@ -1,4 +1,4 @@
-"""Bounded Socket.IO sessions for RomM's verified main and netplay events."""
+"""Bounded Socket.IO sessions for RomM's verified main, netplay and device events."""
 
 import asyncio
 import base64
@@ -18,7 +18,8 @@ MAX_BYTES = 16_384
 MAX_SESSIONS = 4
 MAX_PENDING_ACKS = 20
 SESSION_TTL = 300
-PATHS = {"main": "ws/socket.io", "netplay": "netplay/socket.io"}
+PATHS = {"main": "ws/socket.io", "netplay": "netplay/socket.io", "devices": "ws/socket.io"}
+NAMESPACES = {"main": "/", "netplay": "/", "devices": "/devices"}
 CALL_EVENTS = {
     "main": {
         "scan": "Object: platforms, platform_fs_slugs, type, roms_ids, apis, "
@@ -29,9 +30,11 @@ CALL_EVENTS = {
         "activity:stop": "Optional object: device_id; otherwise uses this session's device.",
     },
     "netplay": {
-        "open-room": "Object: extra {sessionid, userid or playerId, optional room_name, "
-        "game_id, domain, player_name, room_password}; optional maxPlayers.",
-        "join-room": "Object: extra {sessionid, userid or playerId, optional room_password}.",
+        "open-room": "RomM 5.4 object: extra {sessionid, userid or playerId, game_id (ROM ID), "
+        "optional room_name, domain, player_name}; optional top-level password and maxPlayers. "
+        "Requires ROMM_SESSION_COOKIE. Legacy extra.room_password is rejected.",
+        "join-room": "RomM 5.4 object: extra {sessionid, userid or playerId}; "
+        "optional top-level password. Guests may join password-protected rooms.",
         "leave-room": "No payload. Leaves the room joined by this socket session.",
         "webrtc-signal": "Object: target; optional candidate, offer, answer, requestRenegotiate.",
         "webrtc-signal-error": "Two-argument event: JSON array [error_string, data].",
@@ -39,6 +42,7 @@ CALL_EVENTS = {
         "snapshot": "Any JSON payload, broadcast to this session's room.",
         "input": "Any JSON payload, broadcast to this session's room.",
     },
+    "devices": {},
 }
 LISTEN_EVENTS = {
     "main": {
@@ -49,6 +53,11 @@ LISTEN_EVENTS = {
         "scan:update_stats",
         "activity:update",
         "activity:clear",
+        "activity:refresh",
+        "notifications:new",
+        "notifications:read",
+        "notifications:dismissed",
+        "install:updated",
         "logs:entry",
         "sync:started",
         "sync:progress",
@@ -62,6 +71,7 @@ LISTEN_EVENTS = {
         "permissions:changed",
     },
     "netplay": {"users-updated", "webrtc-signal", "data-message", "snapshot", "input"},
+    "devices": {"install:queued", "install:cancelled"},
 }
 
 
@@ -95,6 +105,7 @@ class SocketAPI:
             "services": {
                 service: {
                     "path": path,
+                    "namespace": NAMESPACES[service],
                     "call_events": CALL_EVENTS[service],
                     "listen_events": sorted(LISTEN_EVENTS[service]),
                 }
@@ -112,6 +123,12 @@ class SocketAPI:
                 ],
                 "main_auth": "ROMM_SESSION_COOKIE: value of RomM's romm_session browser cookie; "
                 "RomM 5.3.1 does not authenticate these sockets with bearer tokens.",
+                "netplay_auth": "ROMM_SESSION_COOKIE authenticates RomM 5.4 hosting and "
+                "unpassworded joins; password-protected guest joins may omit it. "
+                "Password payloads target RomM 5.4; do not use with older backends.",
+                "devices_auth": "ROMM_DEVICE_TOKEN: separate device-bound client token with "
+                "devices.read; backend DEVICE_INSTALL_ENABLED must be enabled. "
+                "Listen-only /devices namespace; no session cookie is sent.",
                 "logs": "ROMM_ALLOW_ADMIN required to capture logs:entry.",
             },
             "limits": {
@@ -138,7 +155,13 @@ class SocketAPI:
         if isinstance(value, bytes):
             if len(value) > MAX_BYTES // 3:
                 return {"binary_bytes": len(value), "omitted": True}
-            for name in ("romm_token", "romm_session_cookie", "auth_token", "romm_password"):
+            for name in (
+                "romm_token",
+                "romm_session_cookie",
+                "romm_device_token",
+                "auth_token",
+                "romm_password",
+            ):
                 secret = getattr(self.settings, name, "")
                 if secret:
                     value = value.replace(str(secret).encode(), b"[redacted]")
@@ -148,7 +171,13 @@ class SocketAPI:
         if isinstance(value, (list, tuple)):
             return [self._safe(v) for v in value]
         if isinstance(value, str):
-            for name in ("romm_token", "romm_session_cookie", "auth_token", "romm_password"):
+            for name in (
+                "romm_token",
+                "romm_session_cookie",
+                "romm_device_token",
+                "auth_token",
+                "romm_password",
+            ):
                 secret = getattr(self.settings, name, "")
                 if secret:
                     value = value.replace(str(secret), "[redacted]")
@@ -187,7 +216,7 @@ class SocketAPI:
     async def open(self, service: str) -> dict:
         self._gate("realtime")
         if service not in PATHS:
-            raise ToolError("Socket service must be main or netplay.")
+            raise ToolError("Socket service must be main, netplay or devices.")
         parsed = urlsplit(self.settings.romm_url)
         if (
             parsed.scheme not in {"http", "https"}
@@ -198,16 +227,22 @@ class SocketAPI:
             or parsed.fragment
         ):
             raise ToolError("ROMM_URL must be an HTTP(S) base URL without credentials or query.")
-        headers = {"Authorization": "Bearer " + self.settings.romm_token}
-        if service == "main":
+        token = self.settings.romm_token
+        if service == "devices":
+            token = getattr(self.settings, "romm_device_token", "")
+            if not token:
+                raise ToolError("Device Socket.IO requires a device-bound ROMM_DEVICE_TOKEN.")
+        headers = {"Authorization": "Bearer " + token}
+        if service in {"main", "netplay"}:
             cookie = getattr(self.settings, "romm_session_cookie", "")
-            if not cookie:
+            if service == "main" and not cookie:
                 raise ToolError(
                     "Main Socket.IO requires ROMM_SESSION_COOKIE; bearer is unsupported."
                 )
             if any(char in cookie for char in "\r\n;"):
                 raise ToolError("ROMM_SESSION_COOKIE must contain only the cookie value.")
-            headers["Cookie"] = "romm_session=" + cookie
+            if cookie:
+                headers["Cookie"] = "romm_session=" + cookie
         async with self.lock:
             if len(self.sessions) >= MAX_SESSIONS:
                 raise ToolError("Socket session limit reached; close an existing session.")
@@ -234,13 +269,14 @@ class SocketAPI:
                 if event in LISTEN_EVENTS[service]:
                     self._capture(session, event, args[0] if len(args) == 1 else list(args))
 
-            client.on("*", receive)
+            client.on("*", receive, namespace=NAMESPACES[service])
             try:
                 async with asyncio.timeout(10):
                     prefix = parsed.path.strip("/")
                     await client.connect(
                         f"{parsed.scheme}://{parsed.netloc}",
                         headers=headers,
+                        namespaces=[NAMESPACES[service]],
                         socketio_path="/".join(filter(None, [prefix, PATHS[service]])),
                         wait_timeout=5,
                         transports=["websocket"],
@@ -279,6 +315,27 @@ class SocketAPI:
             self._gate("destructive")
         if len(self._encode(payload).encode()) > MAX_BYTES:
             raise ToolError("Socket payload exceeds 16384 bytes.")
+        if session.service == "netplay" and event in {"open-room", "join-room"}:
+            if not isinstance(payload, dict) or not isinstance(payload.get("extra"), dict):
+                raise ToolError("Room payload must be an object with an extra object.")
+            extra = payload["extra"]
+            if "room_password" in extra:
+                raise ToolError("Legacy extra.room_password is unsafe; use top-level password.")
+            if "password" in payload and not isinstance(payload["password"], str):
+                raise ToolError("Room password must be a string.")
+            if event == "open-room":
+                if not getattr(self.settings, "romm_session_cookie", ""):
+                    raise ToolError("Hosting requires ROMM_SESSION_COOKIE on RomM 5.4.")
+                game_id = extra.get("game_id")
+                if isinstance(game_id, bool) or not isinstance(game_id, (int, str)):
+                    raise ToolError("open-room requires extra.game_id containing a ROM ID.")
+                try:
+                    if int(game_id) <= 0:
+                        raise ValueError
+                except ValueError:
+                    raise ToolError(
+                        "open-room requires extra.game_id containing a ROM ID."
+                    ) from None
         payload = self._wire(payload)
         if event in {"scan:stop", "leave-room"} and payload is not None:
             raise ToolError("This event accepts no payload.")

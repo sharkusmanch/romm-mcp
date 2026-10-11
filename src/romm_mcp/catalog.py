@@ -5,7 +5,9 @@ from dataclasses import dataclass
 
 from mcp.server.mcpserver.exceptions import ToolError
 
-METHODS = {"get", "head", "post", "put", "patch", "delete", "options"}
+from .webdav import DAV_METHODS, webdav_operations
+
+METHODS = {"get", "head", "post", "put", "patch", "delete", "options"} | set(DAV_METHODS)
 DYNAMIC_UPLOAD = re.compile(
     r"^/api/roms/\{id\}/(manuals(?:/files)?|walkthroughs/files|soundtracks|screenshots)$"
 )
@@ -37,7 +39,18 @@ class Catalog:
                     check_refs(v)
 
         check_refs(document)
-        for path, item in document.get("paths", {}).items():
+        paths = dict(document.get("paths", {}))
+        version = re.match(
+            r"^v?(\d+)\.(\d+)(?:\.|$)", str(document.get("info", {}).get("version", ""))
+        )
+        if version and tuple(map(int, version.groups())) >= (5, 4):
+            for path, definitions in webdav_operations().items():
+                if path in paths:
+                    raise ToolError(
+                        "Upstream WebDAV definitions conflict with the verified supplement."
+                    )
+                paths[path] = definitions
+        for path, item in paths.items():
             # Literal route templates never need percent encoding; reject it so
             # proxy decoding cannot turn a declared route into another endpoint.
             if (
@@ -75,7 +88,13 @@ class Catalog:
     def is_write(self, op, query=None):
         q = query or {}
         return (
-            op.method not in ("get", "head", "options")
+            op.method not in ("get", "head", "options", "propfind")
+            or (op.spec.get("x-romm-webdav") and op.method in ("get", "head"))
+            or (
+                op.method == "get"
+                and op.path == "/api/roms/{id}/content/{file_name}"
+                and q.get("format") is not None
+            )
             or op.path
             in (
                 "/api/login/openid",
@@ -140,6 +159,7 @@ class Catalog:
         if (
             "multipart/form-data" in op.spec.get("requestBody", {}).get("content", {})
             or "/content" in p
+            or p == "/api/roms/{id}/easyrpg/{path}"
             or p.endswith("/avatar")
             or p == "/api/roms/download"
             or "/upload" in p
@@ -186,6 +206,29 @@ class Catalog:
             gates |= {"writes", "files"}
         if p.startswith("/api/tasks/run/") or p == "/api/roms/upload/{upload_id}/complete":
             gates.add("destructive")
+        # RomM 5.4 routes contain side effects/admin checks not represented by scopes.
+        if (
+            p.startswith("/api/notification-channels/apprise-services")
+            or (p.startswith("/api/notification-channels") and self.is_write(op))
+            or p == "/api/audit-events"
+        ):
+            gates.add("admin")
+        if p.startswith("/api/devices/") and "/installs" in p and self.is_write(op):
+            gates |= {"tasks", "files"}
+        if p == "/api/tasks/scan":
+            gates |= {"writes", "tasks", "files", "destructive"}
+        if p in ("/api/saves/{id}/file-name", "/api/states/{id}/file-name"):
+            gates.add("files")
+        if (
+            m == "get"
+            and p == "/api/roms/{id}/content/{file_name}"
+            and (query or {}).get("format") is not None
+        ):
+            gates |= {"writes", "tasks", "files"}
+        if op.spec.get("x-romm-webdav"):
+            gates.add("files")
+            if m in ("put", "move", "delete"):
+                gates |= {"writes", "destructive"}
         return sorted(gates)
 
     def check(self, op, query=None, extra=()):

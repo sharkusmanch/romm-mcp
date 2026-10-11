@@ -48,3 +48,10 @@ async def test_registration_readonly_and_typed_bounded_schema():
     assert len(rw) == 14
     assert all(t.output_schema for t in rw)
     assert not next(t for t in rw if t.name == "update_collection_roms").annotations.read_only_hint
+
+
+async def test_webdav_methods_are_available_in_discovery_filter():
+    tools = await create_server(settings()).list_tools()
+    catalog = next(tool for tool in tools if tool.name == "romm_api_list")
+    options = catalog.input_schema["properties"]["method"]["anyOf"][0]["enum"]
+    assert {"PROPFIND", "MOVE", "MKCOL", "LOCK", "UNLOCK"} <= set(options)
