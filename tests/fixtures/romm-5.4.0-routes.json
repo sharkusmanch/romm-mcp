@@ -1,0 +1,4449 @@
+[
+  {
+    "path": "/api/activity",
+    "method": "get",
+    "operationId": "get_all_activity_api_activity_get",
+    "tags": [
+      "activity"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.read"
+        ]
+      }
+    ],
+    "summary": "Return every currently active play session across all users."
+  },
+  {
+    "path": "/api/activity/heartbeat",
+    "method": "delete",
+    "operationId": "clear_device_activity_api_activity_heartbeat_delete",
+    "tags": [
+      "activity"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Immediately clear an active session for a device (e.g. on graceful exit)."
+  },
+  {
+    "path": "/api/activity/heartbeat",
+    "method": "post",
+    "operationId": "device_heartbeat_api_activity_heartbeat_post",
+    "tags": [
+      "activity"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Heartbeat endpoint for external devices (muOS, Android, etc.)."
+  },
+  {
+    "path": "/api/activity/rom/{rom_id}",
+    "method": "get",
+    "operationId": "get_rom_activity_api_activity_rom__rom_id__get",
+    "tags": [
+      "activity"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.read"
+        ]
+      }
+    ],
+    "summary": "Return all active play sessions for a specific ROM."
+  },
+  {
+    "path": "/api/audit-events",
+    "method": "get",
+    "operationId": "get_audit_events_api_audit_events_get",
+    "tags": [
+      "audit"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.read"
+        ]
+      }
+    ],
+    "summary": "The audit log, newest first: everyone's for an admin, the caller's own otherwise."
+  },
+  {
+    "path": "/api/auth/device/approve",
+    "method": "post",
+    "operationId": "approve_api_auth_device_approve_post",
+    "tags": [
+      "device-auth"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "Create the Device + bound ClientToken and mark the request approved."
+  },
+  {
+    "path": "/api/auth/device/deny",
+    "method": "post",
+    "operationId": "deny_api_auth_device_deny_post",
+    "tags": [
+      "device-auth"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "deny"
+  },
+  {
+    "path": "/api/auth/device/init",
+    "method": "post",
+    "operationId": "device_auth_init_api_auth_device_init_post",
+    "tags": [
+      "device-auth"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Device-initiated: start a new pairing flow. Open endpoint, rate-limited."
+  },
+  {
+    "path": "/api/auth/device/pending/{user_code}",
+    "method": "get",
+    "operationId": "get_pending_api_auth_device_pending__user_code__get",
+    "tags": [
+      "device-auth"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.read"
+        ]
+      }
+    ],
+    "summary": "Fetch a pending request's metadata for the approval screen."
+  },
+  {
+    "path": "/api/auth/device/token",
+    "method": "post",
+    "operationId": "token_api_auth_device_token_post",
+    "tags": [
+      "device-auth"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Device-facing polling endpoint. Open, rate-limited per-IP and per-code."
+  },
+  {
+    "path": "/api/client-tokens",
+    "method": "get",
+    "operationId": "list_tokens_api_client_tokens_get",
+    "tags": [
+      "client-tokens"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.read"
+        ]
+      }
+    ],
+    "summary": "list_tokens"
+  },
+  {
+    "path": "/api/client-tokens",
+    "method": "post",
+    "operationId": "create_token_api_client_tokens_post",
+    "tags": [
+      "client-tokens"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "create_token"
+  },
+  {
+    "path": "/api/client-tokens/all",
+    "method": "get",
+    "operationId": "list_all_tokens_api_client_tokens_all_get",
+    "tags": [
+      "client-tokens"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.read"
+        ]
+      }
+    ],
+    "summary": "list_all_tokens"
+  },
+  {
+    "path": "/api/client-tokens/exchange",
+    "method": "post",
+    "operationId": "exchange_pair_code_api_client_tokens_exchange_post",
+    "tags": [
+      "client-tokens"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "exchange_pair_code"
+  },
+  {
+    "path": "/api/client-tokens/pair/{code}/status",
+    "method": "get",
+    "operationId": "pair_status_api_client_tokens_pair__code__status_get",
+    "tags": [
+      "client-tokens"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "pair_status"
+  },
+  {
+    "path": "/api/client-tokens/{token_id}",
+    "method": "delete",
+    "operationId": "delete_token_api_client_tokens__token_id__delete",
+    "tags": [
+      "client-tokens"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "delete_token"
+  },
+  {
+    "path": "/api/client-tokens/{token_id}/admin",
+    "method": "delete",
+    "operationId": "admin_delete_token_api_client_tokens__token_id__admin_delete",
+    "tags": [
+      "client-tokens"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.write"
+        ]
+      }
+    ],
+    "summary": "admin_delete_token"
+  },
+  {
+    "path": "/api/client-tokens/{token_id}/pair",
+    "method": "post",
+    "operationId": "pair_token_api_client_tokens__token_id__pair_post",
+    "tags": [
+      "client-tokens"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "pair_token"
+  },
+  {
+    "path": "/api/client-tokens/{token_id}/regenerate",
+    "method": "put",
+    "operationId": "regenerate_token_api_client_tokens__token_id__regenerate_put",
+    "tags": [
+      "client-tokens"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "regenerate_token"
+  },
+  {
+    "path": "/api/collections",
+    "method": "get",
+    "operationId": "get_collections_api_collections_get",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.read"
+        ]
+      }
+    ],
+    "summary": "Get collections endpoint"
+  },
+  {
+    "path": "/api/collections",
+    "method": "post",
+    "operationId": "add_collection_api_collections_post",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.write"
+        ]
+      }
+    ],
+    "summary": "Create collection endpoint"
+  },
+  {
+    "path": "/api/collections/identifiers",
+    "method": "get",
+    "operationId": "get_collection_identifiers_api_collections_identifiers_get",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.read"
+        ]
+      }
+    ],
+    "summary": "Get collections identifiers endpoint"
+  },
+  {
+    "path": "/api/collections/smart",
+    "method": "get",
+    "operationId": "get_smart_collections_api_collections_smart_get",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.read"
+        ]
+      }
+    ],
+    "summary": "Get smart collections endpoint"
+  },
+  {
+    "path": "/api/collections/smart",
+    "method": "post",
+    "operationId": "add_smart_collection_api_collections_smart_post",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.write"
+        ]
+      }
+    ],
+    "summary": "Create smart collection endpoint"
+  },
+  {
+    "path": "/api/collections/smart/identifiers",
+    "method": "get",
+    "operationId": "get_smart_collection_identifiers_api_collections_smart_identifiers_get",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.read"
+        ]
+      }
+    ],
+    "summary": "Get smart collections identifiers endpoint"
+  },
+  {
+    "path": "/api/collections/smart/{id}",
+    "method": "delete",
+    "operationId": "delete_smart_collection_api_collections_smart__id__delete",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.write"
+        ]
+      }
+    ],
+    "summary": "Delete a smart collection by ID."
+  },
+  {
+    "path": "/api/collections/smart/{id}",
+    "method": "get",
+    "operationId": "get_smart_collection_api_collections_smart__id__get",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.read"
+        ]
+      }
+    ],
+    "summary": "Get smart collection endpoint"
+  },
+  {
+    "path": "/api/collections/smart/{id}",
+    "method": "put",
+    "operationId": "update_smart_collection_api_collections_smart__id__put",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.write"
+        ]
+      }
+    ],
+    "summary": "Update smart collection endpoint"
+  },
+  {
+    "path": "/api/collections/smart/{id}/visibility",
+    "method": "put",
+    "operationId": "update_smart_collection_visibility_api_collections_smart__id__visibility_put",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.write"
+        ]
+      }
+    ],
+    "summary": "Share or unshare a smart collection (owner only), leaving its filters."
+  },
+  {
+    "path": "/api/collections/virtual",
+    "method": "get",
+    "operationId": "get_virtual_collections_api_collections_virtual_get",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.read"
+        ]
+      }
+    ],
+    "summary": "Get virtual collections endpoint"
+  },
+  {
+    "path": "/api/collections/virtual/identifiers",
+    "method": "get",
+    "operationId": "get_virtual_collection_identifiers_api_collections_virtual_identifiers_get",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.read"
+        ]
+      }
+    ],
+    "summary": "Get virtual collections identifiers endpoint"
+  },
+  {
+    "path": "/api/collections/virtual/{id}",
+    "method": "get",
+    "operationId": "get_virtual_collection_api_collections_virtual__id__get",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.read"
+        ]
+      }
+    ],
+    "summary": "Get virtual collections endpoint"
+  },
+  {
+    "path": "/api/collections/{id}",
+    "method": "delete",
+    "operationId": "delete_collection_api_collections__id__delete",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.write"
+        ]
+      }
+    ],
+    "summary": "Delete a collection by ID."
+  },
+  {
+    "path": "/api/collections/{id}",
+    "method": "get",
+    "operationId": "get_collection_api_collections__id__get",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.read"
+        ]
+      }
+    ],
+    "summary": "Get collections endpoint"
+  },
+  {
+    "path": "/api/collections/{id}",
+    "method": "put",
+    "operationId": "update_collection_api_collections__id__put",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.write"
+        ]
+      }
+    ],
+    "summary": "Update collection endpoint"
+  },
+  {
+    "path": "/api/collections/{id}/roms",
+    "method": "delete",
+    "operationId": "remove_roms_from_collection_api_collections__id__roms_delete",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.write"
+        ]
+      }
+    ],
+    "summary": "Atomically remove ROMs from a collection without replacing the full list."
+  },
+  {
+    "path": "/api/collections/{id}/roms",
+    "method": "post",
+    "operationId": "add_roms_to_collection_api_collections__id__roms_post",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.write"
+        ]
+      }
+    ],
+    "summary": "Atomically add ROMs to a collection without replacing the full list."
+  },
+  {
+    "path": "/api/collections/{id}/visibility",
+    "method": "put",
+    "operationId": "update_collection_visibility_api_collections__id__visibility_put",
+    "tags": [
+      "collections"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "collections.write"
+        ]
+      }
+    ],
+    "summary": "Share or unshare a collection (owner only), leaving its games and cover."
+  },
+  {
+    "path": "/api/config",
+    "method": "get",
+    "operationId": "get_config_api_config_get",
+    "tags": [
+      "config"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Get config endpoint"
+  },
+  {
+    "path": "/api/config/converto_settings",
+    "method": "put",
+    "operationId": "update_converto_settings_api_config_converto_settings_put",
+    "tags": [
+      "config"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Update the runtime-editable converto.* settings"
+  },
+  {
+    "path": "/api/config/exclude",
+    "method": "post",
+    "operationId": "add_exclusion_api_config_exclude_post",
+    "tags": [
+      "config"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Add platform exclusion to the configuration"
+  },
+  {
+    "path": "/api/config/exclude/{exclusion_type}/{exclusion_value}",
+    "method": "delete",
+    "operationId": "delete_exclusion_api_config_exclude__exclusion_type___exclusion_value__delete",
+    "tags": [
+      "config"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Delete platform binding from the configuration"
+  },
+  {
+    "path": "/api/config/scan",
+    "method": "put",
+    "operationId": "update_scan_settings_api_config_scan_put",
+    "tags": [
+      "config"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Replace the scan.* section of the configuration"
+  },
+  {
+    "path": "/api/config/system/platforms",
+    "method": "post",
+    "operationId": "add_platform_binding_api_config_system_platforms_post",
+    "tags": [
+      "config"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Add platform binding to the configuration"
+  },
+  {
+    "path": "/api/config/system/platforms/{fs_slug}",
+    "method": "delete",
+    "operationId": "delete_platform_binding_api_config_system_platforms__fs_slug__delete",
+    "tags": [
+      "config"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Delete platform binding from the configuration"
+  },
+  {
+    "path": "/api/config/system/versions",
+    "method": "post",
+    "operationId": "add_platform_version_api_config_system_versions_post",
+    "tags": [
+      "config"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Add platform version to the configuration"
+  },
+  {
+    "path": "/api/config/system/versions/{fs_slug}",
+    "method": "delete",
+    "operationId": "delete_platform_version_api_config_system_versions__fs_slug__delete",
+    "tags": [
+      "config"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Delete platform version from the configuration"
+  },
+  {
+    "path": "/api/devices",
+    "method": "get",
+    "operationId": "get_devices_api_devices_get",
+    "tags": [
+      "devices"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.read"
+        ]
+      }
+    ],
+    "summary": "get_devices"
+  },
+  {
+    "path": "/api/devices",
+    "method": "post",
+    "operationId": "register_device_api_devices_post",
+    "tags": [
+      "devices"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.write"
+        ]
+      }
+    ],
+    "summary": "register_device"
+  },
+  {
+    "path": "/api/devices/online",
+    "method": "get",
+    "operationId": "get_online_devices_api_devices_online_get",
+    "tags": [
+      "devices"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.read"
+        ]
+      }
+    ],
+    "summary": "Ids of the caller's devices holding an open device socket or that claimed lately."
+  },
+  {
+    "path": "/api/devices/{device_id}",
+    "method": "delete",
+    "operationId": "delete_device_api_devices__device_id__delete",
+    "tags": [
+      "devices"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.write"
+        ]
+      }
+    ],
+    "summary": "delete_device"
+  },
+  {
+    "path": "/api/devices/{device_id}",
+    "method": "get",
+    "operationId": "get_device_api_devices__device_id__get",
+    "tags": [
+      "devices"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.read"
+        ]
+      }
+    ],
+    "summary": "get_device"
+  },
+  {
+    "path": "/api/devices/{device_id}",
+    "method": "put",
+    "operationId": "update_device_api_devices__device_id__put",
+    "tags": [
+      "devices"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.write"
+        ]
+      }
+    ],
+    "summary": "update_device"
+  },
+  {
+    "path": "/api/devices/{device_id}/installs",
+    "method": "get",
+    "operationId": "list_install_requests_api_devices__device_id__installs_get",
+    "tags": [
+      "devices"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.read"
+        ]
+      }
+    ],
+    "summary": "The device's pending and taken requests, oldest first."
+  },
+  {
+    "path": "/api/devices/{device_id}/installs",
+    "method": "post",
+    "operationId": "create_install_request_api_devices__device_id__installs_post",
+    "tags": [
+      "devices"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.write",
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Queue a rom for install on a device, returning a live request for the same pair with 200."
+  },
+  {
+    "path": "/api/devices/{device_id}/installs/claim",
+    "method": "post",
+    "operationId": "claim_install_requests_api_devices__device_id__installs_claim_post",
+    "tags": [
+      "devices"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.write",
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Take every pending request and return all the device holds taken, oldest first."
+  },
+  {
+    "path": "/api/devices/{device_id}/installs/{request_id}",
+    "method": "delete",
+    "operationId": "cancel_install_request_api_devices__device_id__installs__request_id__delete",
+    "tags": [
+      "devices"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.write"
+        ]
+      }
+    ],
+    "summary": "Cancel a request still pending or taken; one already ended is a 404."
+  },
+  {
+    "path": "/api/devices/{device_id}/installs/{request_id}",
+    "method": "put",
+    "operationId": "update_install_request_api_devices__device_id__installs__request_id__put",
+    "tags": [
+      "devices"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.write"
+        ]
+      }
+    ],
+    "summary": "The device reports the outcome of a request it has taken, which ends the request."
+  },
+  {
+    "path": "/api/export/gamelist-xml",
+    "method": "post",
+    "operationId": "export_gamelist_xml_api_export_gamelist_xml_post",
+    "tags": [
+      "export"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Export platforms/ROMs to gamelist.xml format and write to platform directories"
+  },
+  {
+    "path": "/api/export/pegasus",
+    "method": "post",
+    "operationId": "export_pegasus_api_export_pegasus_post",
+    "tags": [
+      "export"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Export platforms/ROMs to Pegasus metadata.pegasus.txt format and write to platform directories"
+  },
+  {
+    "path": "/api/feeds/fpkgi/{platform_slug}",
+    "method": "get",
+    "operationId": "fpkgi_feed_api_feeds_fpkgi__platform_slug__get",
+    "tags": [
+      "feeds"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "https://github.com/ItsJokerZz/FPKGi"
+  },
+  {
+    "path": "/api/feeds/kekatsu/{platform_slug}",
+    "method": "get",
+    "operationId": "kekatsu_ds_feed_api_feeds_kekatsu__platform_slug__get",
+    "tags": [
+      "feeds"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Get Kekatsu DS feed endpoint"
+  },
+  {
+    "path": "/api/feeds/pkgi/ps3/{content_type}",
+    "method": "get",
+    "operationId": "pkgi_ps3_feed_api_feeds_pkgi_ps3__content_type__get",
+    "tags": [
+      "feeds"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Get PKGi PS3 feed endpoint"
+  },
+  {
+    "path": "/api/feeds/pkgi/psp/{content_type}",
+    "method": "get",
+    "operationId": "pkgi_psp_feed_api_feeds_pkgi_psp__content_type__get",
+    "tags": [
+      "feeds"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Get PKGi PSP feed endpoint"
+  },
+  {
+    "path": "/api/feeds/pkgi/psvita/{content_type}",
+    "method": "get",
+    "operationId": "pkgi_psvita_feed_api_feeds_pkgi_psvita__content_type__get",
+    "tags": [
+      "feeds"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Get PKGi PS Vita feed endpoint"
+  },
+  {
+    "path": "/api/feeds/pkgj/psp/dlc",
+    "method": "get",
+    "operationId": "pkgj_psp_dlcs_feed_api_feeds_pkgj_psp_dlc_get",
+    "tags": [
+      "feeds"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "pkgj_psp_dlcs_feed"
+  },
+  {
+    "path": "/api/feeds/pkgj/psp/games",
+    "method": "get",
+    "operationId": "pkgj_psp_games_feed_api_feeds_pkgj_psp_games_get",
+    "tags": [
+      "feeds"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "pkgj_psp_games_feed"
+  },
+  {
+    "path": "/api/feeds/pkgj/psvita/dlc",
+    "method": "get",
+    "operationId": "pkgj_psv_dlcs_feed_api_feeds_pkgj_psvita_dlc_get",
+    "tags": [
+      "feeds"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "pkgj_psv_dlcs_feed"
+  },
+  {
+    "path": "/api/feeds/pkgj/psvita/games",
+    "method": "get",
+    "operationId": "pkgj_psv_games_feed_api_feeds_pkgj_psvita_games_get",
+    "tags": [
+      "feeds"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "pkgj_psv_games_feed"
+  },
+  {
+    "path": "/api/feeds/pkgj/psx/games",
+    "method": "get",
+    "operationId": "pkgj_psx_games_feed_api_feeds_pkgj_psx_games_get",
+    "tags": [
+      "feeds"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "pkgj_psx_games_feed"
+  },
+  {
+    "path": "/api/feeds/tinfoil",
+    "method": "get",
+    "operationId": "tinfoil_index_feed_api_feeds_tinfoil_get",
+    "tags": [
+      "feeds"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Get tinfoil custom index feed endpoint"
+  },
+  {
+    "path": "/api/feeds/webrcade",
+    "method": "get",
+    "operationId": "platforms_webrcade_feed_api_feeds_webrcade_get",
+    "tags": [
+      "feeds"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Get webrcade feed endpoint"
+  },
+  {
+    "path": "/api/firmware",
+    "method": "get",
+    "operationId": "get_platform_firmware_api_firmware_get",
+    "tags": [
+      "firmware"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "firmware.read"
+        ]
+      }
+    ],
+    "summary": "Get firmware endpoint"
+  },
+  {
+    "path": "/api/firmware",
+    "method": "post",
+    "operationId": "add_firmware_api_firmware_post",
+    "tags": [
+      "firmware"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "firmware.write"
+        ]
+      }
+    ],
+    "summary": "Upload firmware files endpoint"
+  },
+  {
+    "path": "/api/firmware/delete",
+    "method": "post",
+    "operationId": "delete_firmware_api_firmware_delete_post",
+    "tags": [
+      "firmware"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "firmware.write"
+        ]
+      }
+    ],
+    "summary": "Delete firmware."
+  },
+  {
+    "path": "/api/firmware/identifiers",
+    "method": "get",
+    "operationId": "get_firmware_identifiers_api_firmware_identifiers_get",
+    "tags": [
+      "firmware"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "firmware.read"
+        ]
+      }
+    ],
+    "summary": "Get firmware identifiers endpoint"
+  },
+  {
+    "path": "/api/firmware/{id}",
+    "method": "get",
+    "operationId": "get_firmware_api_firmware__id__get",
+    "tags": [
+      "firmware"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "firmware.read"
+        ]
+      }
+    ],
+    "summary": "Get firmware endpoint"
+  },
+  {
+    "path": "/api/firmware/{id}/content/{file_name}",
+    "method": "get",
+    "operationId": "get_firmware_content_api_firmware__id__content__file_name__get",
+    "tags": [
+      "firmware"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "firmware.read"
+        ]
+      }
+    ],
+    "summary": "Download firmware endpoint"
+  },
+  {
+    "path": "/api/firmware/{id}/content/{file_name}",
+    "method": "head",
+    "operationId": "head_firmware_content_api_firmware__id__content__file_name__head",
+    "tags": [
+      "firmware"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "firmware.read"
+        ]
+      }
+    ],
+    "summary": "Head firmware content endpoint"
+  },
+  {
+    "path": "/api/forgot-password",
+    "method": "post",
+    "operationId": "request_password_reset_api_forgot_password_post",
+    "tags": [
+      "auth"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Request a password reset link for the user."
+  },
+  {
+    "path": "/api/heartbeat",
+    "method": "get",
+    "operationId": "heartbeat_api_heartbeat_get",
+    "tags": [
+      "system"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Endpoint to set the CSRF token in cache and return all the basic RomM config"
+  },
+  {
+    "path": "/api/heartbeat/metadata/{source}",
+    "method": "get",
+    "operationId": "metadata_heartbeat_api_heartbeat_metadata__source__get",
+    "tags": [
+      "system"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Endpoint to return the heartbeat of the metadata sources"
+  },
+  {
+    "path": "/api/login",
+    "method": "post",
+    "operationId": "login_api_login_post",
+    "tags": [
+      "auth"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Session login endpoint"
+  },
+  {
+    "path": "/api/login/openid",
+    "method": "get",
+    "operationId": "login_via_openid_api_login_openid_get",
+    "tags": [
+      "auth"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "OIDC login endpoint"
+  },
+  {
+    "path": "/api/logout",
+    "method": "post",
+    "operationId": "logout_api_logout_post",
+    "tags": [
+      "auth"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Session logout endpoint"
+  },
+  {
+    "path": "/api/logs",
+    "method": "get",
+    "operationId": "get_logs_api_logs_get",
+    "tags": [
+      "logs"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "logs.read"
+        ]
+      }
+    ],
+    "summary": "Return the most recent backend log lines for backfill (admin only)."
+  },
+  {
+    "path": "/api/memory-cards",
+    "method": "get",
+    "operationId": "get_memory_cards_api_memory_cards_get",
+    "tags": [
+      "memory-cards"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "The caller's own cards, newest-synced first, optionally one emulator."
+  },
+  {
+    "path": "/api/memory-cards",
+    "method": "post",
+    "operationId": "add_memory_card_api_memory_cards_post",
+    "tags": [
+      "memory-cards"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Create an empty memory card. It hydrates onto a container at the next"
+  },
+  {
+    "path": "/api/memory-cards/delete",
+    "method": "post",
+    "operationId": "delete_memory_cards_api_memory_cards_delete_post",
+    "tags": [
+      "memory-cards"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Delete cards the caller owns, with their version files. Versions cascade"
+  },
+  {
+    "path": "/api/memory-cards/shared",
+    "method": "get",
+    "operationId": "get_shared_memory_cards_api_memory_cards_shared_get",
+    "tags": [
+      "memory-cards"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Cards for an emulator visible to the caller: their own plus other users'"
+  },
+  {
+    "path": "/api/memory-cards/versions/{id}/content",
+    "method": "get",
+    "operationId": "download_memory_card_version_api_memory_cards_versions__id__content_get",
+    "tags": [
+      "memory-cards"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Download a version's card archive. Readable if the caller owns the parent"
+  },
+  {
+    "path": "/api/memory-cards/{id}",
+    "method": "get",
+    "operationId": "get_memory_card_api_memory_cards__id__get",
+    "tags": [
+      "memory-cards"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "A single card: the caller's own or another user's public one."
+  },
+  {
+    "path": "/api/memory-cards/{id}",
+    "method": "put",
+    "operationId": "rename_memory_card_api_memory_cards__id__put",
+    "tags": [
+      "memory-cards"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Rename a card (owner only)."
+  },
+  {
+    "path": "/api/memory-cards/{id}/content",
+    "method": "get",
+    "operationId": "download_memory_card_api_memory_cards__id__content_get",
+    "tags": [
+      "memory-cards"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Download the card as it stands now, without going through its history."
+  },
+  {
+    "path": "/api/memory-cards/{id}/versions",
+    "method": "get",
+    "operationId": "get_memory_card_versions_api_memory_cards__id__versions_get",
+    "tags": [
+      "memory-cards"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "A card's snapshot history, newest first."
+  },
+  {
+    "path": "/api/memory-cards/{id}/versions",
+    "method": "post",
+    "operationId": "upload_memory_card_version_api_memory_cards__id__versions_post",
+    "tags": [
+      "memory-cards"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Store a card image the user supplied as the card's newest version, which"
+  },
+  {
+    "path": "/api/memory-cards/{id}/visibility",
+    "method": "put",
+    "operationId": "update_memory_card_visibility_api_memory_cards__id__visibility_put",
+    "tags": [
+      "memory-cards"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Toggle a card's public/private visibility (owner only). Sharing is"
+  },
+  {
+    "path": "/api/music/albums",
+    "method": "get",
+    "operationId": "get_music_albums_api_music_albums_get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Distinct albums (with counts); both a browse list and a typeahead."
+  },
+  {
+    "path": "/api/music/artists",
+    "method": "get",
+    "operationId": "get_music_artists_api_music_artists_get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Distinct artists (with counts); both a browse list and a typeahead."
+  },
+  {
+    "path": "/api/music/favorites",
+    "method": "delete",
+    "operationId": "remove_music_favorites_api_music_favorites_delete",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "playlists.write"
+        ]
+      }
+    ],
+    "summary": "Unmark tracks as favorites."
+  },
+  {
+    "path": "/api/music/favorites",
+    "method": "get",
+    "operationId": "get_music_favorites_api_music_favorites_get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "playlists.read"
+        ]
+      }
+    ],
+    "summary": "The requesting user's favorite tracks; same shape and filters as /tracks."
+  },
+  {
+    "path": "/api/music/favorites",
+    "method": "post",
+    "operationId": "add_music_favorites_api_music_favorites_post",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "playlists.write"
+        ]
+      }
+    ],
+    "summary": "Mark tracks as favorites; already-favorited tracks are ignored."
+  },
+  {
+    "path": "/api/music/game-genres",
+    "method": "get",
+    "operationId": "get_music_game_genres_api_music_game_genres_get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Distinct genres of the *games* the tracks belong to, with counts."
+  },
+  {
+    "path": "/api/music/games",
+    "method": "get",
+    "operationId": "get_music_games_api_music_games_get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Games that have soundtrack tracks -- the jukebox's album list."
+  },
+  {
+    "path": "/api/music/genres",
+    "method": "get",
+    "operationId": "get_music_genres_api_music_genres_get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Distinct genres (with counts); both a browse list and a typeahead."
+  },
+  {
+    "path": "/api/music/platforms",
+    "method": "get",
+    "operationId": "get_music_platforms_api_music_platforms_get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Platforms that have soundtrack tracks, with per-platform counts."
+  },
+  {
+    "path": "/api/music/playlists",
+    "method": "get",
+    "operationId": "get_playlists_api_music_playlists_get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "playlists.read"
+        ]
+      }
+    ],
+    "summary": "The requesting user's playlists plus other users' public playlists."
+  },
+  {
+    "path": "/api/music/playlists",
+    "method": "post",
+    "operationId": "add_playlist_api_music_playlists_post",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "playlists.write"
+        ]
+      }
+    ],
+    "summary": "add_playlist"
+  },
+  {
+    "path": "/api/music/playlists/{id}",
+    "method": "delete",
+    "operationId": "delete_playlist_api_music_playlists__id__delete",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "playlists.write"
+        ]
+      }
+    ],
+    "summary": "delete_playlist"
+  },
+  {
+    "path": "/api/music/playlists/{id}",
+    "method": "get",
+    "operationId": "get_playlist_api_music_playlists__id__get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "playlists.read"
+        ]
+      }
+    ],
+    "summary": "get_playlist"
+  },
+  {
+    "path": "/api/music/playlists/{id}",
+    "method": "put",
+    "operationId": "update_playlist_api_music_playlists__id__put",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "playlists.write"
+        ]
+      }
+    ],
+    "summary": "update_playlist"
+  },
+  {
+    "path": "/api/music/playlists/{id}/tracks",
+    "method": "delete",
+    "operationId": "remove_playlist_tracks_api_music_playlists__id__tracks_delete",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "playlists.write"
+        ]
+      }
+    ],
+    "summary": "remove_playlist_tracks"
+  },
+  {
+    "path": "/api/music/playlists/{id}/tracks",
+    "method": "get",
+    "operationId": "get_playlist_tracks_api_music_playlists__id__tracks_get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "playlists.read"
+        ]
+      }
+    ],
+    "summary": "Tracks of a playlist, in playlist order by default."
+  },
+  {
+    "path": "/api/music/playlists/{id}/tracks",
+    "method": "post",
+    "operationId": "add_playlist_tracks_api_music_playlists__id__tracks_post",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "playlists.write"
+        ]
+      }
+    ],
+    "summary": "Append tracks to the playlist; tracks already present are ignored."
+  },
+  {
+    "path": "/api/music/playlists/{id}/tracks/order",
+    "method": "put",
+    "operationId": "set_playlist_track_order_api_music_playlists__id__tracks_order_put",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "playlists.write"
+        ]
+      }
+    ],
+    "summary": "Reorder the playlist to match the given rom_file_ids."
+  },
+  {
+    "path": "/api/music/stats",
+    "method": "get",
+    "operationId": "get_music_stats_api_music_stats_get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Library-wide track count and total duration."
+  },
+  {
+    "path": "/api/music/tracks",
+    "method": "get",
+    "operationId": "get_music_tracks_api_music_tracks_get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Flat, filterable, paginated list of soundtrack tracks."
+  },
+  {
+    "path": "/api/music/years",
+    "method": "get",
+    "operationId": "get_music_years_api_music_years_get",
+    "tags": [
+      "music"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Distinct years (with counts); both a browse list and a typeahead."
+  },
+  {
+    "path": "/api/netplay/list",
+    "method": "get",
+    "operationId": "get_rooms_api_netplay_list_get",
+    "tags": [
+      "netplay"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "get_rooms"
+  },
+  {
+    "path": "/api/notification-channels",
+    "method": "get",
+    "operationId": "get_notification_channels_api_notification_channels_get",
+    "tags": [
+      "notification-channels"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.read"
+        ]
+      }
+    ],
+    "summary": "The caller's notification channels."
+  },
+  {
+    "path": "/api/notification-channels",
+    "method": "post",
+    "operationId": "create_notification_channel_api_notification_channels_post",
+    "tags": [
+      "notification-channels"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "Add a channel; an email address gets a code to confirm it with first."
+  },
+  {
+    "path": "/api/notification-channels/apprise-services",
+    "method": "get",
+    "operationId": "get_apprise_services_api_notification_channels_apprise_services_get",
+    "tags": [
+      "notification-channels"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.read"
+        ]
+      }
+    ],
+    "summary": "Every service an admin's Apprise channel can go out on, with its fields."
+  },
+  {
+    "path": "/api/notification-channels/apprise-services/parse",
+    "method": "post",
+    "operationId": "parse_apprise_url_api_notification_channels_apprise_services_parse_post",
+    "tags": [
+      "notification-channels"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.read"
+        ]
+      }
+    ],
+    "summary": "Read a service's own URL (a Discord webhook's) or an Apprise URL into its fields."
+  },
+  {
+    "path": "/api/notification-channels/{channel_id}",
+    "method": "delete",
+    "operationId": "delete_notification_channel_api_notification_channels__channel_id__delete",
+    "tags": [
+      "notification-channels"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "delete_notification_channel"
+  },
+  {
+    "path": "/api/notification-channels/{channel_id}",
+    "method": "patch",
+    "operationId": "update_notification_channel_api_notification_channels__channel_id__patch",
+    "tags": [
+      "notification-channels"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "Change a channel; a new email address has to be confirmed again."
+  },
+  {
+    "path": "/api/notification-channels/{channel_id}/confirm",
+    "method": "post",
+    "operationId": "confirm_notification_channel_api_notification_channels__channel_id__confirm_post",
+    "tags": [
+      "notification-channels"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "Confirm an email address with the code sent to it."
+  },
+  {
+    "path": "/api/notification-channels/{channel_id}/resend-code",
+    "method": "post",
+    "operationId": "resend_notification_channel_code_api_notification_channels__channel_id__resend_code_post",
+    "tags": [
+      "notification-channels"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "resend_notification_channel_code"
+  },
+  {
+    "path": "/api/notification-channels/{channel_id}/test",
+    "method": "post",
+    "operationId": "test_notification_channel_api_notification_channels__channel_id__test_post",
+    "tags": [
+      "notification-channels"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "Send a sample notification out on the channel right away."
+  },
+  {
+    "path": "/api/notifications",
+    "method": "delete",
+    "operationId": "dismiss_all_notifications_api_notifications_delete",
+    "tags": [
+      "notifications"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "dismiss_all_notifications"
+  },
+  {
+    "path": "/api/notifications",
+    "method": "get",
+    "operationId": "get_notifications_api_notifications_get",
+    "tags": [
+      "notifications"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.read"
+        ]
+      }
+    ],
+    "summary": "The caller's notifications, newest first."
+  },
+  {
+    "path": "/api/notifications",
+    "method": "post",
+    "operationId": "create_notification_api_notifications_post",
+    "tags": [
+      "notifications"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "Notify the caller or, for an admin, other users; returns what was sent."
+  },
+  {
+    "path": "/api/notifications/read",
+    "method": "post",
+    "operationId": "mark_notifications_read_api_notifications_read_post",
+    "tags": [
+      "notifications"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "Mark the given notifications read, or all of them when `ids` is null."
+  },
+  {
+    "path": "/api/notifications/{notification_id}",
+    "method": "delete",
+    "operationId": "dismiss_notification_api_notifications__notification_id__delete",
+    "tags": [
+      "notifications"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "dismiss_notification"
+  },
+  {
+    "path": "/api/oauth/openid",
+    "method": "get",
+    "operationId": "auth_openid_api_oauth_openid_get",
+    "tags": [
+      "auth"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "OIDC callback endpoint"
+  },
+  {
+    "path": "/api/permissions/catalog",
+    "method": "get",
+    "operationId": "get_permission_catalog_api_permissions_catalog_get",
+    "tags": [
+      "permissions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.read"
+        ]
+      }
+    ],
+    "summary": "The entity/action vocabulary the admin UI renders its matrix from."
+  },
+  {
+    "path": "/api/permissions/groups",
+    "method": "get",
+    "operationId": "list_permission_groups_api_permissions_groups_get",
+    "tags": [
+      "permissions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.read"
+        ]
+      }
+    ],
+    "summary": "List all permission groups with their grants."
+  },
+  {
+    "path": "/api/permissions/groups",
+    "method": "post",
+    "operationId": "create_permission_group_api_permissions_groups_post",
+    "tags": [
+      "permissions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.write"
+        ]
+      }
+    ],
+    "summary": "Create a permission group."
+  },
+  {
+    "path": "/api/permissions/groups/{id}",
+    "method": "delete",
+    "operationId": "delete_permission_group_api_permissions_groups__id__delete",
+    "tags": [
+      "permissions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.write"
+        ]
+      }
+    ],
+    "summary": "Delete a permission group. Members fall back to the default group."
+  },
+  {
+    "path": "/api/permissions/groups/{id}",
+    "method": "put",
+    "operationId": "update_permission_group_api_permissions_groups__id__put",
+    "tags": [
+      "permissions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.write"
+        ]
+      }
+    ],
+    "summary": "Update a permission group (name/description/default/grants)."
+  },
+  {
+    "path": "/api/permissions/hidden",
+    "method": "delete",
+    "operationId": "remove_hidden_entity_api_permissions_hidden_delete",
+    "tags": [
+      "permissions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.write"
+        ]
+      }
+    ],
+    "summary": "Un-hide an entity for a user OR a group."
+  },
+  {
+    "path": "/api/permissions/hidden",
+    "method": "post",
+    "operationId": "add_hidden_entity_api_permissions_hidden_post",
+    "tags": [
+      "permissions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.write"
+        ]
+      }
+    ],
+    "summary": "Hide an entity from a user OR a group (exactly one principal)."
+  },
+  {
+    "path": "/api/permissions/me",
+    "method": "get",
+    "operationId": "get_my_permissions_api_permissions_me_get",
+    "tags": [
+      "permissions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.read"
+        ]
+      }
+    ],
+    "summary": "Return the caller's effective permissions for the UI to gate on."
+  },
+  {
+    "path": "/api/permissions/users/{user_id}",
+    "method": "get",
+    "operationId": "get_user_permissions_api_permissions_users__user_id__get",
+    "tags": [
+      "permissions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.read"
+        ]
+      }
+    ],
+    "summary": "A user's group membership, per-user overrides and hidden entities."
+  },
+  {
+    "path": "/api/permissions/users/{user_id}",
+    "method": "put",
+    "operationId": "update_user_permissions_api_permissions_users__user_id__put",
+    "tags": [
+      "permissions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.write"
+        ]
+      }
+    ],
+    "summary": "Assign a user's group and/or replace their per-user overrides."
+  },
+  {
+    "path": "/api/platforms",
+    "method": "get",
+    "operationId": "get_platforms_api_platforms_get",
+    "tags": [
+      "platforms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve platforms."
+  },
+  {
+    "path": "/api/platforms",
+    "method": "post",
+    "operationId": "add_platform_api_platforms_post",
+    "tags": [
+      "platforms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Create a platform."
+  },
+  {
+    "path": "/api/platforms/filesystem",
+    "method": "get",
+    "operationId": "get_filesystem_platforms_endpoint_api_platforms_filesystem_get",
+    "tags": [
+      "platforms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve platform folders on disk that have no database row yet."
+  },
+  {
+    "path": "/api/platforms/identifiers",
+    "method": "get",
+    "operationId": "get_platform_identifiers_api_platforms_identifiers_get",
+    "tags": [
+      "platforms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve platform identifiers."
+  },
+  {
+    "path": "/api/platforms/supported",
+    "method": "get",
+    "operationId": "get_supported_platforms_endpoint_api_platforms_supported_get",
+    "tags": [
+      "platforms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve the list of supported platforms."
+  },
+  {
+    "path": "/api/platforms/{id}",
+    "method": "delete",
+    "operationId": "delete_platform_api_platforms__id__delete",
+    "tags": [
+      "platforms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Delete a platform by ID."
+  },
+  {
+    "path": "/api/platforms/{id}",
+    "method": "get",
+    "operationId": "get_platform_api_platforms__id__get",
+    "tags": [
+      "platforms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve a platform by ID."
+  },
+  {
+    "path": "/api/platforms/{id}",
+    "method": "put",
+    "operationId": "update_platform_api_platforms__id__put",
+    "tags": [
+      "platforms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "platforms.write"
+        ]
+      }
+    ],
+    "summary": "Update a platform."
+  },
+  {
+    "path": "/api/play-sessions",
+    "method": "get",
+    "operationId": "get_play_sessions_api_play_sessions_get",
+    "tags": [
+      "play-sessions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.read"
+        ]
+      }
+    ],
+    "summary": "get_play_sessions"
+  },
+  {
+    "path": "/api/play-sessions",
+    "method": "post",
+    "operationId": "ingest_play_sessions_api_play_sessions_post",
+    "tags": [
+      "play-sessions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "ingest_play_sessions"
+  },
+  {
+    "path": "/api/play-sessions/{session_id}",
+    "method": "delete",
+    "operationId": "delete_play_session_api_play_sessions__session_id__delete",
+    "tags": [
+      "play-sessions"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "delete_play_session"
+  },
+  {
+    "path": "/api/recommendations",
+    "method": "get",
+    "operationId": "get_recommendations_api_recommendations_get",
+    "tags": [
+      "recommendations"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Personalised game recommendations for the current user."
+  },
+  {
+    "path": "/api/reset-password",
+    "method": "post",
+    "operationId": "reset_password_api_reset_password_post",
+    "tags": [
+      "auth"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Reset password using the token."
+  },
+  {
+    "path": "/api/roms",
+    "method": "get",
+    "operationId": "get_roms_api_roms_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve roms."
+  },
+  {
+    "path": "/api/roms/by-hash",
+    "method": "get",
+    "operationId": "get_rom_by_hash_api_roms_by_hash_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "get_rom_by_hash"
+  },
+  {
+    "path": "/api/roms/by-metadata-provider",
+    "method": "get",
+    "operationId": "get_rom_by_metadata_provider_api_roms_by_metadata_provider_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve a rom by metadata ID."
+  },
+  {
+    "path": "/api/roms/delete",
+    "method": "post",
+    "operationId": "delete_roms_api_roms_delete_post",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Delete roms."
+  },
+  {
+    "path": "/api/roms/download",
+    "method": "get",
+    "operationId": "download_roms_api_roms_download_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Download a list of roms as a zip file."
+  },
+  {
+    "path": "/api/roms/filters",
+    "method": "get",
+    "operationId": "get_rom_filters_api_roms_filters_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "get_rom_filters"
+  },
+  {
+    "path": "/api/roms/identifiers",
+    "method": "get",
+    "operationId": "get_rom_identifiers_api_roms_identifiers_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve rom identifiers."
+  },
+  {
+    "path": "/api/roms/physical",
+    "method": "post",
+    "operationId": "create_physical_rom_api_roms_physical_post",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Manually add a physical game and auto-link its metadata (a single quick scan)."
+  },
+  {
+    "path": "/api/roms/random",
+    "method": "get",
+    "operationId": "get_random_rom_api_roms_random_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve one rom picked at random, or null when the scope holds none."
+  },
+  {
+    "path": "/api/roms/upload/start",
+    "method": "post",
+    "operationId": "start_chunked_upload_api_roms_upload_start_post",
+    "tags": [
+      "roms",
+      "upload"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Initiate a chunked ROM upload session."
+  },
+  {
+    "path": "/api/roms/upload/{upload_id}",
+    "method": "put",
+    "operationId": "upload_chunk_api_roms_upload__upload_id__put",
+    "tags": [
+      "roms",
+      "upload"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Upload a single chunk of a ROM file."
+  },
+  {
+    "path": "/api/roms/upload/{upload_id}/cancel",
+    "method": "post",
+    "operationId": "cancel_chunked_upload_api_roms_upload__upload_id__cancel_post",
+    "tags": [
+      "roms",
+      "upload"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Cancel a chunked upload session and clean up temp files."
+  },
+  {
+    "path": "/api/roms/upload/{upload_id}/complete",
+    "method": "post",
+    "operationId": "complete_chunked_upload_api_roms_upload__upload_id__complete_post",
+    "tags": [
+      "roms",
+      "upload"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Assemble all chunks into the final ROM file."
+  },
+  {
+    "path": "/api/roms/{id}",
+    "method": "get",
+    "operationId": "get_rom_api_roms__id__get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve a rom by ID."
+  },
+  {
+    "path": "/api/roms/{id}",
+    "method": "put",
+    "operationId": "update_rom_api_roms__id__put",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Update a rom."
+  },
+  {
+    "path": "/api/roms/{id}/content/{file_name}",
+    "method": "get",
+    "operationId": "get_rom_content_api_roms__id__content__file_name__get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Download a rom."
+  },
+  {
+    "path": "/api/roms/{id}/content/{file_name}",
+    "method": "head",
+    "operationId": "head_rom_content_api_roms__id__content__file_name__head",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve head information for a rom file download."
+  },
+  {
+    "path": "/api/roms/{id}/convert-to-folder",
+    "method": "post",
+    "operationId": "convert_rom_to_folder_api_roms__id__convert_to_folder_post",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Promote a single-file ROM to a folder ROM in place."
+  },
+  {
+    "path": "/api/roms/{id}/easyrpg/{path}",
+    "method": "get",
+    "operationId": "get_easyrpg_file_api_roms__id__easyrpg__path__get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Serve a generated `index.json`, or a game or RTP file it names, to the EasyRPG web player."
+  },
+  {
+    "path": "/api/roms/{id}/files",
+    "method": "get",
+    "operationId": "get_romfile_api_roms__id__files_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve a rom file by ID."
+  },
+  {
+    "path": "/api/roms/{id}/files/content/{file_name}",
+    "method": "get",
+    "operationId": "get_romfile_content_api_roms__id__files_content__file_name__get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Download a rom file."
+  },
+  {
+    "path": "/api/roms/{id}/identity",
+    "method": "put",
+    "operationId": "update_rom_identity_api_roms__id__identity_put",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Store binary identity a client extracted from a ROM the scan cannot read."
+  },
+  {
+    "path": "/api/roms/{id}/installs",
+    "method": "get",
+    "operationId": "get_rom_installs_api_roms__id__installs_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.read",
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "The caller's pending and taken requests for a rom on any device, oldest first."
+  },
+  {
+    "path": "/api/roms/{id}/manuals",
+    "method": "delete",
+    "operationId": "delete_rom_manuals_api_roms__id__manuals_delete",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Delete manuals for a rom."
+  },
+  {
+    "path": "/api/roms/{id}/manuals",
+    "method": "post",
+    "operationId": "add_rom_manuals_api_roms__id__manuals_post",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Upload manuals for a rom."
+  },
+  {
+    "path": "/api/roms/{id}/manuals/files",
+    "method": "post",
+    "operationId": "add_rom_manual_file_api_roms__id__manuals_files_post",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Upload a manual document into the ROM's own manual/ subfolder."
+  },
+  {
+    "path": "/api/roms/{id}/manuals/files/{file_id}",
+    "method": "delete",
+    "operationId": "delete_rom_manual_file_api_roms__id__manuals_files__file_id__delete",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Delete a single manual file from a ROM's manual/ subfolder."
+  },
+  {
+    "path": "/api/roms/{id}/manuals/redownload",
+    "method": "post",
+    "operationId": "redownload_rom_manual_api_roms__id__manuals_redownload_post",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Re-download a rom's manual from its scraped URL (e.g. screenscraper.fr)."
+  },
+  {
+    "path": "/api/roms/{id}/notes",
+    "method": "get",
+    "operationId": "get_rom_notes_api_roms__id__notes_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Get all notes for a ROM."
+  },
+  {
+    "path": "/api/roms/{id}/notes",
+    "method": "post",
+    "operationId": "create_rom_note_api_roms__id__notes_post",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Create a new note for a ROM."
+  },
+  {
+    "path": "/api/roms/{id}/notes/identifiers",
+    "method": "get",
+    "operationId": "get_rom_note_identifiers_api_roms__id__notes_identifiers_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Get all note identifiers for a ROM."
+  },
+  {
+    "path": "/api/roms/{id}/notes/{note_id}",
+    "method": "delete",
+    "operationId": "delete_rom_note_api_roms__id__notes__note_id__delete",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Delete a ROM note."
+  },
+  {
+    "path": "/api/roms/{id}/notes/{note_id}",
+    "method": "put",
+    "operationId": "update_rom_note_api_roms__id__notes__note_id__put",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Update a ROM note."
+  },
+  {
+    "path": "/api/roms/{id}/patch",
+    "method": "post",
+    "operationId": "patch_rom_api_roms__id__patch_post",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Apply a patch to a ROM file server-side and return the patched file."
+  },
+  {
+    "path": "/api/roms/{id}/props",
+    "method": "put",
+    "operationId": "update_rom_user_api_roms__id__props_put",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Update rom data associated to the current user."
+  },
+  {
+    "path": "/api/roms/{id}/screenshots",
+    "method": "post",
+    "operationId": "add_rom_screenshots_api_roms__id__screenshots_post",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Upload a screenshot image into the ROM's screenshots/ subfolder."
+  },
+  {
+    "path": "/api/roms/{id}/screenshots/{file_id}",
+    "method": "delete",
+    "operationId": "delete_rom_screenshot_api_roms__id__screenshots__file_id__delete",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Delete a single screenshot file from a ROM."
+  },
+  {
+    "path": "/api/roms/{id}/similar",
+    "method": "get",
+    "operationId": "get_similar_roms_api_roms__id__similar_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Games in this library that resemble the given one."
+  },
+  {
+    "path": "/api/roms/{id}/simple",
+    "method": "get",
+    "operationId": "get_rom_simple_api_roms__id__simple_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve a rom by ID with the lightweight schema \u2014 no eager-loaded"
+  },
+  {
+    "path": "/api/roms/{id}/soundtracks",
+    "method": "post",
+    "operationId": "add_rom_soundtracks_api_roms__id__soundtracks_post",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Upload a soundtrack audio file into the ROM's soundtrack/ subfolder."
+  },
+  {
+    "path": "/api/roms/{id}/soundtracks/metadata",
+    "method": "get",
+    "operationId": "get_rom_soundtrack_metadata_api_roms__id__soundtracks_metadata_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Return compact audio metadata for every soundtrack file of a ROM."
+  },
+  {
+    "path": "/api/roms/{id}/soundtracks/{file_id}",
+    "method": "delete",
+    "operationId": "delete_rom_soundtrack_api_roms__id__soundtracks__file_id__delete",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Delete a single soundtrack file from a ROM."
+  },
+  {
+    "path": "/api/roms/{id}/walkthroughs/files",
+    "method": "post",
+    "operationId": "add_rom_walkthrough_file_api_roms__id__walkthroughs_files_post",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Upload a walkthrough document into the ROM's own walkthrough/ subfolder."
+  },
+  {
+    "path": "/api/roms/{id}/walkthroughs/files/{file_id}",
+    "method": "delete",
+    "operationId": "delete_rom_walkthrough_file_api_roms__id__walkthroughs_files__file_id__delete",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Delete a single walkthrough file from a ROM's walkthrough/ subfolder."
+  },
+  {
+    "path": "/api/roms/{id}/walkthroughs/gamefaqs",
+    "method": "post",
+    "operationId": "add_rom_gamefaqs_walkthrough_api_roms__id__walkthroughs_gamefaqs_post",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Fetch a GameFAQs text guide by URL and store it as a walkthrough."
+  },
+  {
+    "path": "/api/roms/{rom_id}/files/{file_id}",
+    "method": "delete",
+    "operationId": "delete_rom_file_api_roms__rom_id__files__file_id__delete",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.write"
+        ]
+      }
+    ],
+    "summary": "Delete a single file from a ROM."
+  },
+  {
+    "path": "/api/roms/{rom_id}/files/{file_id}/progress",
+    "method": "get",
+    "operationId": "get_rom_file_progress_api_roms__rom_id__files__file_id__progress_get",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Get the current user's reading progress for a document file."
+  },
+  {
+    "path": "/api/roms/{rom_id}/files/{file_id}/progress",
+    "method": "put",
+    "operationId": "update_rom_file_progress_api_roms__rom_id__files__file_id__progress_put",
+    "tags": [
+      "roms"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Upsert the current user's reading progress for a document file."
+  },
+  {
+    "path": "/api/saves",
+    "method": "get",
+    "operationId": "get_saves_api_saves_get",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve saves for the current user."
+  },
+  {
+    "path": "/api/saves",
+    "method": "post",
+    "operationId": "add_save_api_saves_post",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Upload a save file for a ROM."
+  },
+  {
+    "path": "/api/saves/delete",
+    "method": "post",
+    "operationId": "delete_saves_api_saves_delete_post",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Delete saves."
+  },
+  {
+    "path": "/api/saves/identifiers",
+    "method": "get",
+    "operationId": "get_save_identifiers_api_saves_identifiers_get",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve save identifiers."
+  },
+  {
+    "path": "/api/saves/summary",
+    "method": "get",
+    "operationId": "get_saves_summary_api_saves_summary_get",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve saves summary grouped by slot."
+  },
+  {
+    "path": "/api/saves/{id}",
+    "method": "get",
+    "operationId": "get_save_api_saves__id__get",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve a save by ID."
+  },
+  {
+    "path": "/api/saves/{id}",
+    "method": "put",
+    "operationId": "update_save_api_saves__id__put",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Update a save file."
+  },
+  {
+    "path": "/api/saves/{id}/content",
+    "method": "get",
+    "operationId": "download_save_api_saves__id__content_get",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Download a save file."
+  },
+  {
+    "path": "/api/saves/{id}/downloaded",
+    "method": "post",
+    "operationId": "confirm_download_api_saves__id__downloaded_post",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.write"
+        ]
+      }
+    ],
+    "summary": "Confirm a save was downloaded successfully."
+  },
+  {
+    "path": "/api/saves/{id}/favorite",
+    "method": "put",
+    "operationId": "update_save_favorite_api_saves__id__favorite_put",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Favorite a save, sorting it ahead of the rest (owner only)."
+  },
+  {
+    "path": "/api/saves/{id}/file-name",
+    "method": "put",
+    "operationId": "rename_save_api_saves__id__file_name_put",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Rename a save's file, its screenshot following along (owner only)."
+  },
+  {
+    "path": "/api/saves/{id}/labels",
+    "method": "put",
+    "operationId": "update_save_labels_api_saves__id__labels_put",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Replace a save's free-text labels (owner only)."
+  },
+  {
+    "path": "/api/saves/{id}/track",
+    "method": "post",
+    "operationId": "track_save_api_saves__id__track_post",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.write"
+        ]
+      }
+    ],
+    "summary": "Re-enable sync tracking for a save on a device."
+  },
+  {
+    "path": "/api/saves/{id}/untrack",
+    "method": "post",
+    "operationId": "untrack_save_api_saves__id__untrack_post",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.write"
+        ]
+      }
+    ],
+    "summary": "Disable sync tracking for a save on a device."
+  },
+  {
+    "path": "/api/saves/{id}/visibility",
+    "method": "put",
+    "operationId": "update_save_visibility_api_saves__id__visibility_put",
+    "tags": [
+      "saves"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Toggle a save's public/private visibility (owner only)."
+  },
+  {
+    "path": "/api/screenshots",
+    "method": "post",
+    "operationId": "add_screenshot_api_screenshots_post",
+    "tags": [
+      "screenshots"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Upload a per-user gallery screenshot for a ROM."
+  },
+  {
+    "path": "/api/screenshots/{id}",
+    "method": "delete",
+    "operationId": "delete_screenshot_api_screenshots__id__delete",
+    "tags": [
+      "screenshots"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Delete a gallery screenshot \u2014 its file and DB row (owner only)."
+  },
+  {
+    "path": "/api/screenshots/{id}",
+    "method": "put",
+    "operationId": "update_screenshot_api_screenshots__id__put",
+    "tags": [
+      "screenshots"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Toggle a gallery screenshot's public/private visibility (owner only)."
+  },
+  {
+    "path": "/api/screenshots/{id}/content",
+    "method": "get",
+    "operationId": "download_screenshot_api_screenshots__id__content_get",
+    "tags": [
+      "screenshots"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Download a screenshot file. Owner can download any of their screenshots;"
+  },
+  {
+    "path": "/api/search/cover",
+    "method": "get",
+    "operationId": "search_cover_api_search_cover_get",
+    "tags": [
+      "search"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Search the cover art providers, in the configured cover priority order."
+  },
+  {
+    "path": "/api/search/roms",
+    "method": "get",
+    "operationId": "search_rom_api_search_roms_get",
+    "tags": [
+      "search"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Search for rom in metadata providers"
+  },
+  {
+    "path": "/api/setup/library",
+    "method": "get",
+    "operationId": "get_setup_library_info_api_setup_library_get",
+    "tags": [
+      "system"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Get library structure information for setup wizard."
+  },
+  {
+    "path": "/api/setup/platforms",
+    "method": "post",
+    "operationId": "create_setup_platforms_api_setup_platforms_post",
+    "tags": [
+      "system"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Create platform folders during setup wizard."
+  },
+  {
+    "path": "/api/states",
+    "method": "get",
+    "operationId": "get_states_api_states_get",
+    "tags": [
+      "states"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Retrieve states for the current user."
+  },
+  {
+    "path": "/api/states",
+    "method": "post",
+    "operationId": "add_state_api_states_post",
+    "tags": [
+      "states"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "add_state"
+  },
+  {
+    "path": "/api/states/delete",
+    "method": "post",
+    "operationId": "delete_states_api_states_delete_post",
+    "tags": [
+      "states"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Delete states."
+  },
+  {
+    "path": "/api/states/identifiers",
+    "method": "get",
+    "operationId": "get_state_identifiers_api_states_identifiers_get",
+    "tags": [
+      "states"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Get state identifiers endpoint"
+  },
+  {
+    "path": "/api/states/{id}",
+    "method": "get",
+    "operationId": "get_state_api_states__id__get",
+    "tags": [
+      "states"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "get_state"
+  },
+  {
+    "path": "/api/states/{id}",
+    "method": "put",
+    "operationId": "update_state_api_states__id__put",
+    "tags": [
+      "states"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "update_state"
+  },
+  {
+    "path": "/api/states/{id}/content",
+    "method": "get",
+    "operationId": "download_state_api_states__id__content_get",
+    "tags": [
+      "states"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Download a state file. Owner can download any of their states; everyone"
+  },
+  {
+    "path": "/api/states/{id}/favorite",
+    "method": "put",
+    "operationId": "update_state_favorite_api_states__id__favorite_put",
+    "tags": [
+      "states"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Favorite a state, sorting it ahead of the rest (owner only)."
+  },
+  {
+    "path": "/api/states/{id}/file-name",
+    "method": "put",
+    "operationId": "rename_state_api_states__id__file_name_put",
+    "tags": [
+      "states"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Rename a state's file, its screenshot following along (owner only)."
+  },
+  {
+    "path": "/api/states/{id}/labels",
+    "method": "put",
+    "operationId": "update_state_labels_api_states__id__labels_put",
+    "tags": [
+      "states"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Replace a state's free-text labels (owner only)."
+  },
+  {
+    "path": "/api/states/{id}/visibility",
+    "method": "put",
+    "operationId": "update_state_visibility_api_states__id__visibility_put",
+    "tags": [
+      "states"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.write"
+        ]
+      }
+    ],
+    "summary": "Toggle a state's public/private visibility (owner only)."
+  },
+  {
+    "path": "/api/stats",
+    "method": "get",
+    "operationId": "stats_api_stats_get",
+    "tags": [
+      "stats"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Endpoint to return the current RomM stats"
+  },
+  {
+    "path": "/api/streaming/config",
+    "method": "get",
+    "operationId": "get_config_api_streaming_config_get",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Return streaming configuration to the frontend"
+  },
+  {
+    "path": "/api/streaming/containers",
+    "method": "get",
+    "operationId": "list_containers_api_streaming_containers_get",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Admin view, one row per configured container with whatever it is running."
+  },
+  {
+    "path": "/api/streaming/desktop",
+    "method": "post",
+    "operationId": "claim_desktop_session_api_streaming_desktop_post",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Admin, open a container's desktop with no game running."
+  },
+  {
+    "path": "/api/streaming/sessions",
+    "method": "delete",
+    "operationId": "force_release_all_api_streaming_sessions_delete",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Admin, force-release all active sessions."
+  },
+  {
+    "path": "/api/streaming/sessions",
+    "method": "get",
+    "operationId": "list_sessions_api_streaming_sessions_get",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Admin view, active sessions across all configured containers."
+  },
+  {
+    "path": "/api/streaming/sessions",
+    "method": "post",
+    "operationId": "claim_session_api_streaming_sessions_post",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Reserve a container for a ROM and start loading it."
+  },
+  {
+    "path": "/api/streaming/sessions/joinable",
+    "method": "get",
+    "operationId": "list_joinable_sessions_api_streaming_sessions_joinable_get",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Active multiplayer sessions any user may ask to join."
+  },
+  {
+    "path": "/api/streaming/sessions/{platform}",
+    "method": "delete",
+    "operationId": "release_session_api_streaming_sessions__platform__delete",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Release a session and tell the broker to stop the emulator."
+  },
+  {
+    "path": "/api/streaming/sessions/{platform}/heartbeat",
+    "method": "post",
+    "operationId": "heartbeat_session_api_streaming_sessions__platform__heartbeat_post",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Refresh the liveness stamp the frontend beats every ~30s, without which the"
+  },
+  {
+    "path": "/api/streaming/sessions/{platform}/join",
+    "method": "post",
+    "operationId": "join_session_api_streaming_sessions__platform__join_post",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Join a multiplayer session someone else is hosting."
+  },
+  {
+    "path": "/api/streaming/sessions/{platform}/load-state",
+    "method": "post",
+    "operationId": "load_state_api_streaming_sessions__platform__load_state_post",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Load game state from a manual slot or the platform's autosave slot."
+  },
+  {
+    "path": "/api/streaming/sessions/{platform}/mute",
+    "method": "post",
+    "operationId": "set_mute_api_streaming_sessions__platform__mute_post",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Toggle or explicitly set mute state. Omit body to toggle."
+  },
+  {
+    "path": "/api/streaming/sessions/{platform}/save-and-exit",
+    "method": "post",
+    "operationId": "save_and_exit_session_api_streaming_sessions__platform__save_and_exit_post",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Save game state then release the session."
+  },
+  {
+    "path": "/api/streaming/sessions/{platform}/save-state",
+    "method": "post",
+    "operationId": "save_state_api_streaming_sessions__platform__save_state_post",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Save game state to a slot without stopping the emulator."
+  },
+  {
+    "path": "/api/streaming/sessions/{platform}/status",
+    "method": "get",
+    "operationId": "session_status_api_streaming_sessions__platform__status_get",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "Does the caller still hold this platform's session?"
+  },
+  {
+    "path": "/api/streaming/sessions/{platform}/swap-disc",
+    "method": "post",
+    "operationId": "swap_disc_api_streaming_sessions__platform__swap_disc_post",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Change the mounted disc without restarting the emulator."
+  },
+  {
+    "path": "/api/streaming/sessions/{platform}/volume",
+    "method": "post",
+    "operationId": "set_volume_api_streaming_sessions__platform__volume_post",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "roms.user.write"
+        ]
+      }
+    ],
+    "summary": "Set emulator audio volume (0-100)."
+  },
+  {
+    "path": "/api/streaming/states/{rom_id}",
+    "method": "get",
+    "operationId": "get_state_picks_api_streaming_states__rom_id__get",
+    "tags": [
+      "streaming"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read",
+          "roms.read"
+        ]
+      }
+    ],
+    "summary": "The ROM's states the resume picker offers, checked as the claim checks a"
+  },
+  {
+    "path": "/api/sync/devices/{device_id}/push-pull",
+    "method": "post",
+    "operationId": "trigger_push_pull_api_sync_devices__device_id__push_pull_post",
+    "tags": [
+      "sync"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.write"
+        ]
+      }
+    ],
+    "summary": "Manually trigger a push-pull sync for a specific device."
+  },
+  {
+    "path": "/api/sync/negotiate",
+    "method": "post",
+    "operationId": "negotiate_sync_api_sync_negotiate_post",
+    "tags": [
+      "sync"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read",
+          "devices.read"
+        ]
+      }
+    ],
+    "summary": "Negotiate sync operations between a client device and the server."
+  },
+  {
+    "path": "/api/sync/sessions",
+    "method": "get",
+    "operationId": "get_sync_sessions_api_sync_sessions_get",
+    "tags": [
+      "sync"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.read"
+        ]
+      }
+    ],
+    "summary": "List sync sessions for the current user."
+  },
+  {
+    "path": "/api/sync/sessions/{session_id}",
+    "method": "get",
+    "operationId": "get_sync_session_api_sync_sessions__session_id__get",
+    "tags": [
+      "sync"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.read"
+        ]
+      }
+    ],
+    "summary": "Get a specific sync session."
+  },
+  {
+    "path": "/api/sync/sessions/{session_id}/complete",
+    "method": "post",
+    "operationId": "complete_sync_session_api_sync_sessions__session_id__complete_post",
+    "tags": [
+      "sync"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "devices.write"
+        ]
+      }
+    ],
+    "summary": "Mark a sync session as completed, optionally ingesting play sessions."
+  },
+  {
+    "path": "/api/tasks",
+    "method": "get",
+    "operationId": "list_tasks_api_tasks_get",
+    "tags": [
+      "tasks"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "tasks.run"
+        ]
+      }
+    ],
+    "summary": "List all available tasks grouped by task type."
+  },
+  {
+    "path": "/api/tasks/run/{task_name}",
+    "method": "post",
+    "operationId": "run_single_task_api_tasks_run__task_name__post",
+    "tags": [
+      "tasks"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "tasks.run"
+        ]
+      }
+    ],
+    "summary": "Run a single task endpoint."
+  },
+  {
+    "path": "/api/tasks/scan",
+    "method": "post",
+    "operationId": "start_scan_api_tasks_scan_post",
+    "tags": [
+      "tasks"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "tasks.run"
+        ]
+      }
+    ],
+    "summary": "Queue a scan, for clients that authenticate without a session cookie."
+  },
+  {
+    "path": "/api/tasks/status",
+    "method": "get",
+    "operationId": "get_tasks_status_api_tasks_status_get",
+    "tags": [
+      "tasks"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "tasks.run"
+        ]
+      }
+    ],
+    "summary": "Get all active, queued, completed, and failed tasks."
+  },
+  {
+    "path": "/api/tasks/{task_id}",
+    "method": "get",
+    "operationId": "get_task_by_id_api_tasks__task_id__get",
+    "tags": [
+      "tasks"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "tasks.run"
+        ]
+      }
+    ],
+    "summary": "Get the status of a task by its job ID."
+  },
+  {
+    "path": "/api/token",
+    "method": "post",
+    "operationId": "token_api_token_post",
+    "tags": [
+      "auth"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "OAuth2 token endpoint"
+  },
+  {
+    "path": "/api/users",
+    "method": "get",
+    "operationId": "get_users_api_users_get",
+    "tags": [
+      "users"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.read"
+        ]
+      }
+    ],
+    "summary": "Get all users endpoint"
+  },
+  {
+    "path": "/api/users",
+    "method": "post",
+    "operationId": "add_user_api_users_post",
+    "tags": [
+      "users"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Create user endpoint"
+  },
+  {
+    "path": "/api/users/identifiers",
+    "method": "get",
+    "operationId": "get_user_identifiers_api_users_identifiers_get",
+    "tags": [
+      "users"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.read"
+        ]
+      }
+    ],
+    "summary": "Get all user identifiers endpoint"
+  },
+  {
+    "path": "/api/users/invite-link",
+    "method": "post",
+    "operationId": "create_invite_link_api_users_invite_link_post",
+    "tags": [
+      "users"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Create an invite link for a user."
+  },
+  {
+    "path": "/api/users/me",
+    "method": "get",
+    "operationId": "get_current_user_api_users_me_get",
+    "tags": [
+      "users"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.read"
+        ]
+      }
+    ],
+    "summary": "Get current user endpoint"
+  },
+  {
+    "path": "/api/users/register",
+    "method": "post",
+    "operationId": "create_user_from_invite_api_users_register_post",
+    "tags": [
+      "users"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": []
+      }
+    ],
+    "summary": "Create user endpoint with invite link"
+  },
+  {
+    "path": "/api/users/{id}",
+    "method": "delete",
+    "operationId": "delete_user_api_users__id__delete",
+    "tags": [
+      "users"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.write"
+        ]
+      }
+    ],
+    "summary": "Delete a user by ID."
+  },
+  {
+    "path": "/api/users/{id}",
+    "method": "get",
+    "operationId": "get_user_api_users__id__get",
+    "tags": [
+      "users"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "users.read"
+        ]
+      }
+    ],
+    "summary": "Get user endpoint"
+  },
+  {
+    "path": "/api/users/{id}",
+    "method": "put",
+    "operationId": "update_user_api_users__id__put",
+    "tags": [
+      "users"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "Update user endpoint"
+  },
+  {
+    "path": "/api/users/{id}/avatar",
+    "method": "get",
+    "operationId": "get_user_avatar_api_users__id__avatar_get",
+    "tags": [
+      "users"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "assets.read"
+        ]
+      }
+    ],
+    "summary": "Serve a user's avatar image. Avatars are public to any authenticated"
+  },
+  {
+    "path": "/api/users/{id}/ra/refresh",
+    "method": "post",
+    "operationId": "refresh_retro_achievements_api_users__id__ra_refresh_post",
+    "tags": [
+      "users"
+    ],
+    "security": [
+      {
+        "OAuth2PasswordBearer": [
+          "me.write"
+        ]
+      }
+    ],
+    "summary": "Refresh RetroAchievements progression data for a user."
+  }
+]

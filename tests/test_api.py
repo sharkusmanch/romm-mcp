@@ -425,3 +425,20 @@ async def test_concurrent_logout_does_not_restore_stale_cookie():
     finally:
         release.set()
         a.close()
+
+
+async def test_easyrpg_nested_assets_encode_each_segment():
+    seen = []
+    a = api(
+        lambda request: seen.append(request) or httpx.Response(200, json={}),
+        path="/api/roms/{id}/easyrpg/{path}",
+        parameters=[{"name": "path", "in": "path", "schema": {"type": "string"}}],
+    )
+    try:
+        await a.call("test", APIRequest(path={"id": 1, "path": "CharSet/Hero name.png"}))
+        assert seen[0].url.raw_path == b"/api/roms/1/easyrpg/CharSet/Hero%20name.png"
+        with pytest.raises(ToolError):
+            await a.call("test", APIRequest(path={"id": 1, "path": "CharSet/%252e%252e/secrets"}))
+        assert len(seen) == 1
+    finally:
+        a.close()

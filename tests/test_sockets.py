@@ -29,7 +29,7 @@ class FakeSocket:
         self.sent = []
         self.disconnected = False
 
-    def on(self, name, handler):
+    def on(self, name, handler, namespace="/"):
         self.handlers[name] = handler
 
     async def connect(self, url, **kwargs):
@@ -332,7 +332,7 @@ async def test_real_socketio_persistent_room_and_multiple_arguments():
     try:
         first = (await api.open("netplay"))["session_id"]
         second = (await api.open("netplay"))["session_id"]
-        await api.send(first, "open-room", {"extra": {"sessionid": "test-room"}})
+        await api.send(first, "open-room", {"extra": {"sessionid": "test-room", "game_id": 1}})
         await api.listen(first, seconds=1)
         await api.send(second, "join-room", {"extra": {"sessionid": "test-room"}})
         await api.listen(second, seconds=1)
@@ -349,6 +349,134 @@ async def test_real_socketio_persistent_room_and_multiple_arguments():
             if received_errors:
                 break
         assert received_errors == [["test", {"detail": 1}]]
+    finally:
+        await api.aclose()
+        await runner.cleanup()
+
+
+async def test_netplay_uses_cookie_for_authenticated_rooms(fake):
+    api = SocketAPI(settings())
+    try:
+        identifier = (await api.open("netplay"))["session_id"]
+        assert fake.connection[1]["headers"]["Cookie"] == "romm_session=session-secret"
+        await api.send(
+            identifier,
+            "open-room",
+            {
+                "extra": {"sessionid": "room", "userid": "player", "game_id": "12"},
+                "password": "private-room",
+            },
+        )
+        assert fake.sent[-1][1]["password"] == "private-room"
+    finally:
+        await api.aclose()
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"extra": {"game_id": 12, "room_password": "secret"}},
+        {"extra": {"game_id": 12}, "password": 123},
+        {"extra": {}},
+        {"extra": {"game_id": "not-a-rom"}},
+        {"extra": {"game_id": True}},
+    ],
+)
+async def test_netplay_rejects_unsafe_room_payload_before_send(payload, fake):
+    api = SocketAPI(settings())
+    try:
+        identifier = (await api.open("netplay"))["session_id"]
+        with pytest.raises(ToolError):
+            await api.send(identifier, "open-room", payload)
+        assert not fake.sent
+    finally:
+        await api.aclose()
+
+
+async def test_anonymous_netplay_can_join_password_room_but_cannot_host(fake):
+    api = SocketAPI(settings(romm_session_cookie=""))
+    try:
+        identifier = (await api.open("netplay"))["session_id"]
+        with pytest.raises(ToolError, match="ROMM_SESSION_COOKIE"):
+            await api.send(identifier, "open-room", {"extra": {"game_id": 12}})
+        await api.send(
+            identifier,
+            "join-room",
+            {"extra": {"sessionid": "room", "userid": "player"}, "password": "secret"},
+        )
+        assert len(fake.sent) == 1
+    finally:
+        await api.aclose()
+
+
+@pytest.mark.parametrize(
+    "event",
+    [
+        "notifications:new",
+        "notifications:read",
+        "notifications:dismissed",
+        "install:updated",
+        "activity:refresh",
+    ],
+)
+async def test_main_captures_54_events(event, fake):
+    api = SocketAPI(settings())
+    try:
+        identifier = (await api.open("main"))["session_id"]
+        await fake.handlers["*"](event, {"id": 1})
+        assert (await api.listen(identifier, seconds=0.01))["events"] == [
+            {"event": event, "data": {"id": 1}}
+        ]
+    finally:
+        await api.aclose()
+
+
+async def test_devices_require_separate_token(fake):
+    with pytest.raises(ToolError, match="ROMM_DEVICE_TOKEN"):
+        await SocketAPI(settings()).open("devices")
+
+
+async def test_real_device_namespace_isolated_auth_and_install_events():
+    import socketio
+    from aiohttp import web
+
+    server = socketio.AsyncServer(async_mode="aiohttp")
+    app = web.Application()
+    server.attach(app, socketio_path="ws/socket.io")
+    received = []
+
+    @server.on("connect", namespace="/devices")
+    async def connect(sid, environ, auth):
+        received.append((environ.get("HTTP_AUTHORIZATION"), environ.get("HTTP_COOKIE")))
+        await server.emit(
+            "install:queued", {"id": "one", "token": "device-secret"}, to=sid, namespace="/devices"
+        )
+        await server.emit("install:cancelled", {"id": "two"}, to=sid, namespace="/devices")
+
+    @server.on("connect")
+    async def wrong_namespace(sid, environ, auth):
+        raise AssertionError("Device connections must not join the default namespace")
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "127.0.0.1", 0)
+    await site.start()
+    port = site._server.sockets[0].getsockname()[1]
+    api = SocketAPI(
+        settings(
+            romm_url=f"http://127.0.0.1:{port}",
+            romm_device_token="device-secret",
+            allow_writes=False,
+        )
+    )
+    try:
+        identifier = (await api.open("devices"))["session_id"]
+        assert received == [("Bearer device-secret", None)]
+        events = (await api.listen(identifier, seconds=1))["events"]
+        assert [event["event"] for event in events] == ["install:queued", "install:cancelled"]
+        assert "device-secret" not in str(events)
+        with pytest.raises(ToolError):
+            await api.send(identifier, "install:queued", {})
     finally:
         await api.aclose()
         await runner.cleanup()

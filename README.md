@@ -1,8 +1,8 @@
 # RomM MCP
 
 A token-efficient MCP server for a self-hosted RomM library. Runs locally over
-**stdio** or as an authenticated **Streamable HTTP** service. Covers all **246 HTTP
-operations** in RomM **5.3.1** and its **13 callable Socket.IO events**, with explicit
+**stdio** or as an authenticated **Streamable HTTP** service. Covers the complete OpenAPI HTTP surface in RomM **5.3.1 and 5.4.0**,
+plus the hidden **5.4 WebDAV routes** and **13 callable Socket.IO events**, with explicit
 operator switches for writes, files, administration, authentication, tasks, and
 realtime connections. All switches default to **false**.
 
@@ -27,12 +27,12 @@ so hundreds of endpoint schemas do not inflate every MCP tool listing.
 | `romm_api_read` | Invoke an enabled HTTP read by its discovered operation ID |
 | `romm_api_write` | Invoke an enabled HTTP operation that changes state; requires writes |
 | `romm_artifact` | Stage uploads or retrieve downloads using bounded temporary handles |
-| `romm_socket` | Discover, open, send, listen, and close main/netplay Socket.IO sessions |
+| `romm_socket` | Discover, open, send, listen, and close main/netplay/device Socket.IO sessions |
 
 Disabled operations remain discoverable. Start with `romm_api_list`, then
 `romm_api_describe`, then call the appropriate read/write tool using the returned
 `operation_id`. Requests support `path`, `query` (including repeated values), declared
-`headers`, JSON `body`, `form`, multipart `files`, or `raw_artifact_id`. Known gaps in
+`headers`, JSON `body`, `form`, multipart `files`, `raw_artifact_id`, or DAV `xml_body`. Known gaps in
 RomM's upload schemas have explicit corrections in operation descriptions. Callers
 cannot supply arbitrary destinations, URL paths, or upstream authorization headers.
 
@@ -61,9 +61,10 @@ replace external provider, emulator, browser-login, or streaming prerequisites.
 | `ROMM_ALLOW_AUTH` | `false` | Authentication/token workflows and nondefault HTTP authentication modes |
 | `ROMM_ALLOW_FILES` | `false` | Binary transfers and file-affecting operations; permits artifact read/delete |
 | `ROMM_ALLOW_TASKS` | `false` | Task endpoints, exports, streaming mutations, refresh/redownload actions, and socket sends |
-| `ROMM_ALLOW_REALTIME` | `false` | Main/netplay Socket.IO connections |
+| `ROMM_ALLOW_REALTIME` | `false` | Main/netplay/device Socket.IO connections |
 | `ROMM_USERNAME`, `ROMM_PASSWORD` | Empty | Optional configured credentials for HTTP `auth_mode=basic` |
-| `ROMM_SESSION_COOKIE` | Empty | Value only of the `romm_session` browser cookie, required for main Socket.IO |
+| `ROMM_SESSION_COOKIE` | Empty | Value only of the `romm_session` browser cookie, required for main Socket.IO and authenticated 5.4 netplay |
+| `ROMM_DEVICE_TOKEN` | Empty | Separate device-bound client token for `/devices` Socket.IO and HTTP `auth_mode=device` |
 | `ROMM_TRANSFER_DIRECTORY` | System temporary directory | Existing parent for private temporary artifact storage |
 | `ROMM_MAX_TRANSFER_BYTES` | `67108864` | Aggregate artifact storage cap in bytes, across all clients |
 
@@ -85,16 +86,18 @@ Create a scoped RomM client token as the user whose library state you want to ma
 The compact read tools need `me.read`, `roms.read`, `platforms.read`,
 `collections.read`, and `roms.user.read`; compact writes additionally need
 `collections.write` and `roms.user.write`. The bootstrap identity needs `me.write`
-to create a client token; normal server operation does not. For other HTTP endpoints,
+to create a client token; notification writes in 5.4 also need `me.write`. For other HTTP endpoints,
 use the scopes returned by discovery and grant only the capabilities you enable.
 Service accounts have their own collections and progress.
 
 HTTP defaults to bearer authentication. With auth enabled, a request may choose
-`auth_mode=basic`, `session`, or `none`. Basic mode uses configured credentials.
+`auth_mode=basic`, `session`, `device`, or `none`. Basic mode uses configured credentials.
+Device mode uses only `ROMM_DEVICE_TOKEN`, cannot mix with an auth session, and
+is required for install claim/report when the main token is not device-bound.
 Use `auth_session="new"` to start an isolated cookie jar and reuse the returned
 opaque handle for a multi-step login flow; `session` mode requires such a handle.
 At most eight HTTP auth sessions are retained, expiring after ten minutes of
-inactivity. `ROMM_SESSION_COOKIE` is for main Socket.IO, not an implicit HTTP cookie.
+inactivity. `ROMM_SESSION_COOKIE` is for main/netplay Socket.IO, not an implicit HTTP cookie.
 Credentials belong in a secret manager or protected environment, never committed
 client configuration. Treat auth endpoint outputs as sensitive.
 
@@ -140,8 +143,15 @@ and destructive access. Capturing `logs:entry` needs admin.
 
 Main events cover scan start/stop and activity start/heartbeat/stop. Netplay events
 cover room open/join/leave, WebRTC signaling/error, data messages, snapshots, and
-inputs. Main Socket.IO requires `ROMM_SESSION_COOKIE`: RomM 5.3.1 does not authenticate
-that connection using only a bearer token. Binary event values use
+inputs. Main Socket.IO and authenticated 5.4 netplay require `ROMM_SESSION_COOKIE`.
+Hosting needs a valid ROM ID in `extra.game_id`; passwords belong in top-level
+`password`. Legacy `extra.room_password` is rejected to prevent silently creating
+an unprotected room. Password hosting targets RomM 5.4; do not use it on 5.3.
+Guest password joins can omit the cookie. Main sessions also capture notification,
+activity refresh, and install updates. `service="devices"` listens on `/devices`
+using only `ROMM_DEVICE_TOKEN`, without the general bearer or session cookie;
+it captures install queue/cancellation events and accepts no send events.
+Binary event values use
 `{"$binary_base64":"..."}` within the payload limit.
 
 There are at most four sessions, each lasting 300 seconds, with bounded queues of
@@ -149,6 +159,32 @@ There are at most four sessions, each lasting 300 seconds, with bounded queues o
 Truncation is explicit. Disconnect clears activity and leaves netplay rooms;
 background scans continue. A successful send confirms transport acceptance only;
 inspect received events and HTTP state to verify its effects.
+
+## RomM 5.4 HTTP behavior
+
+New REST endpoints are discovered from the running server; restart MCP after an
+upstream upgrade to refresh its cached schema. Device install mutations require
+tasks and files. Scans require tasks, files, and destructive access. Save/state
+file renames require files. Audit history and notification-channel mutations
+require admin: an administrator-owned token can otherwise reach broader data or
+private-network notification destinations despite narrow declared scopes.
+Sending a notification to explicit recipients also requires admin.
+
+A ROM download GET with `query.format` can start a background conversion and must
+use `romm_api_write` with writes, tasks, and files enabled. HTTP 202 returns a
+pending result and `retry-after`, without a download artifact or automatic retry.
+Check status and retry deliberately; a subsequent completed download yields an artifact.
+
+The synthetic `romm_webdav_*` operations expose `/api/sync/retroarch/` on 5.4+.
+Supply a relative `path.file_path` (empty for root), with literal slash-separated
+segments. Encoded traversal, URL destinations, and caller authorization headers
+are rejected. PUT uses `raw_artifact_id`; PROPFIND and LOCK may use a bounded
+`xml_body`. XML responses use normal bounded text output or download artifacts.
+All DAV operations require files; GET/HEAD also require writes because upstream
+can update device/asset records. PUT, DELETE and MOVE require destructive access.
+**RomM 5.4 implements MOVE as deletion and ignores Destination**: it is not a rename.
+ROM-library GET redirects are returned without following them; use the regular
+ROM content endpoint to retrieve those bytes. Upstream user roles and scopes still apply.
 
 ## Run locally
 
@@ -177,12 +213,12 @@ uv run romm-mcp --transport http --host 127.0.0.1 --port 8080
 docker run --rm --read-only --tmpfs /tmp:rw,nosuid,nodev,size=80m \
   -p 127.0.0.1:8080:8080 \
   -e ROMM_URL -e ROMM_TOKEN -e MCP_AUTH_TOKEN -e MCP_ALLOWED_HOSTS \
-  ghcr.io/sharkusmanch/romm-mcp:v0.2.1
+  ghcr.io/sharkusmanch/romm-mcp:v0.3.0
 
 # Container as a local stdio server:
 docker run --rm -i --read-only --tmpfs /tmp:rw,nosuid,nodev,size=80m \
   -e ROMM_URL -e ROMM_TOKEN \
-  ghcr.io/sharkusmanch/romm-mcp:v0.2.1 --transport stdio
+  ghcr.io/sharkusmanch/romm-mcp:v0.3.0 --transport stdio
 ```
 
 Pass the desired `ROMM_ALLOW_*` variables into the container explicitly with `-e`.
@@ -248,7 +284,7 @@ must match the package version. Tags publish amd64/arm64 images, per-platform
 BuildKit SBOMs, GitHub-signed provenance as OCI referrers, and attested Python archives.
 
 ```sh
-gh attestation verify oci://ghcr.io/sharkusmanch/romm-mcp:v0.2.1 \
+gh attestation verify oci://ghcr.io/sharkusmanch/romm-mcp:v0.3.0 \
   --repo sharkusmanch/romm-mcp
 ```
 

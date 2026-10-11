@@ -18,6 +18,7 @@ from referencing.exceptions import NoSuchResource
 
 from .artifacts import ArtifactStore
 from .catalog import DYNAMIC_UPLOAD, Catalog
+from .webdav import DAV_ROOT, encode_path, is_webdav
 
 
 class Upload(BaseModel):
@@ -34,6 +35,7 @@ class APIRequest(BaseModel):
     query: dict[str, Any] = Field(default_factory=dict)
     headers: dict[str, str] = Field(default_factory=dict)
     body: Any = None
+    xml_body: Annotated[str | None, Field(max_length=65536)] = None
     form: dict[str, Any] | None = None
     files: Annotated[list[Upload], Field(max_length=16)] = Field(default_factory=list)
     raw_artifact_id: str | None = None
@@ -41,7 +43,7 @@ class APIRequest(BaseModel):
     response_pointer: Annotated[str, Field(max_length=1000)] = ""
     offset: Annotated[int, Field(ge=0)] = 0
     limit: Annotated[int, Field(ge=1, le=100)] = 20
-    auth_mode: Literal["bearer", "basic", "session", "none"] = "bearer"
+    auth_mode: Literal["bearer", "device", "basic", "session", "none"] = "bearer"
     auth_session: str | None = None
 
 
@@ -206,6 +208,11 @@ class FullAPI:
         path = op.path
         for key, value in request.path.items():
             text = str(value)
+            if (is_webdav(op) and key == "file_path") or (
+                op.path == "/api/roms/{id}/easyrpg/{path}" and key == "path"
+            ):
+                path = path.replace("{" + key + "}", encode_path(value))
+                continue
             decoded = text
             for _ in range(3):
                 decoded = unquote(decoded)
@@ -244,6 +251,10 @@ class FullAPI:
         ):
             raise ToolError(
                 "Only declared safe request headers are supported; auth uses operator settings."
+            )
+        if is_webdav(op) and "destination" in headers:
+            headers["destination"] = (
+                self.settings.romm_url.rstrip("/") + DAV_ROOT + encode_path(headers["destination"])
             )
         query = dict(request.query)
         expected_query = {p["name"] for p in parameters if p.get("in") == "query"}
@@ -293,6 +304,11 @@ class FullAPI:
         return await self._call(operation_id, request, write=write)
 
     async def _call(self, operation_id, request, *, write=False):
+        if request.auth_mode == "device":
+            if not getattr(self.settings, "romm_device_token", None):
+                raise ToolError("Device authentication requires ROMM_DEVICE_TOKEN.")
+            if request.auth_session:
+                raise ToolError("Device authentication cannot use an auth session.")
         catalog = await self.catalog()
         op = catalog.get(operation_id)
         extra = set()
@@ -302,6 +318,13 @@ class FullAPI:
             extra.add("files")
         if request.auth_mode != "bearer" or request.auth_session:
             extra.add("auth")
+        if (
+            op.path == "/api/notifications"
+            and op.method == "post"
+            and isinstance(request.body, dict)
+            and request.body.get("recipients") is not None
+        ):
+            extra.add("admin")
         catalog.check(op, request.query, extra)
         if catalog.is_write(op, request.query) and not write:
             raise ToolError("This operation changes state; use romm_api_write.")
@@ -317,9 +340,14 @@ class FullAPI:
             int("body" in request.model_fields_set)
             + int(request.form is not None)
             + int(request.raw_artifact_id is not None)
+            + int(request.xml_body is not None)
         )
-        if body_kinds > 1 or request.files and request.raw_artifact_id:
-            raise ToolError("Choose JSON body, form/multipart, or raw_artifact_id.")
+        if (
+            body_kinds > 1
+            or request.files
+            and (request.raw_artifact_id or request.xml_body is not None)
+        ):
+            raise ToolError("Choose JSON body, xml_body, form/multipart, or raw_artifact_id.")
         if request.files and "body" in request.model_fields_set:
             raise ToolError("Files cannot accompany JSON body.")
         for f in request.files:
@@ -336,6 +364,11 @@ class FullAPI:
                     "This upload requires one multipart file whose field equals x-upload-filename."
                 )
         content = op.spec.get("requestBody", {}).get("content", {})
+        if request.xml_body is not None:
+            if not is_webdav(op) or op.method not in ("propfind", "lock"):
+                raise ToolError("xml_body is supported only for WebDAV PROPFIND and LOCK.")
+            if len(request.xml_body.encode("utf-8")) > 65536:
+                raise ToolError("xml_body exceeds 64 KiB.")
         if "body" in request.model_fields_set:
             if "application/json" not in content:
                 raise ToolError("This operation does not accept JSON body.")
@@ -386,8 +419,11 @@ class FullAPI:
                 ):
                     fields[k] = [v]
             self.validate(catalog, form_schema, fields, "form body")
-        if request.raw_artifact_id and op.path != "/api/roms/upload/{upload_id}":
-            raise ToolError("Raw upload is supported only for the declared ROM chunk endpoint.")
+        dav_put = is_webdav(op) and op.method == "put"
+        if request.raw_artifact_id and not (op.path == "/api/roms/upload/{upload_id}" or dav_put):
+            raise ToolError("Raw upload is supported only for ROM chunks and WebDAV PUT.")
+        if dav_put and not request.raw_artifact_id:
+            raise ToolError("WebDAV PUT requires raw_artifact_id.")
         if (
             op.path == "/api/roms/upload/{upload_id}"
             and op.method == "put"
@@ -414,6 +450,8 @@ class FullAPI:
             raise ToolError("Session mode requires auth_session=new or a returned handle.")
         if request.auth_mode == "bearer":
             headers["Authorization"] = "Bearer " + self.settings.romm_token
+        if request.auth_mode == "device":
+            headers["Authorization"] = "Bearer " + self.settings.romm_device_token
         auth = None
         if request.auth_mode == "basic":
             if not self.settings.romm_username or not self.settings.romm_password:
@@ -426,6 +464,9 @@ class FullAPI:
                 kwargs = {}
                 if "body" in request.model_fields_set:
                     kwargs["json"] = request.body
+                if request.xml_body is not None:
+                    kwargs["content"] = request.xml_body.encode("utf-8")
+                    headers["Content-Type"] = "application/xml; charset=utf-8"
                 if request.raw_artifact_id:
                     f = stack.enter_context(self.artifacts.open_file(request.raw_artifact_id))
                     headers["Content-Type"] = "application/octet-stream"
@@ -493,6 +534,10 @@ class FullAPI:
                                 "retry-after",
                                 "location",
                                 "content-disposition",
+                                "dav",
+                                "allow",
+                                "ms-author-via",
+                                "lock-token",
                             )
                         }
                         result = {
@@ -523,7 +568,10 @@ class FullAPI:
                                 "Use the RomM nginx front door for downloads, not the internal "
                                 "API backend."
                             )
-                        if request.download:
+                        pending_download = response.status_code == 202 and request.download
+                        if pending_download:
+                            result["pending"] = True
+                        if request.download and not pending_download:
                             download_id = self.artifacts.create()["artifact_id"]
                             async for chunk in response.aiter_bytes():
                                 self.artifacts.append_bytes(download_id, chunk)
@@ -547,7 +595,9 @@ class FullAPI:
                                 value = json.loads(raw)
                             except ValueError:
                                 raise ToolError("Invalid upstream JSON.") from None
-                        elif ctype.startswith("text/"):
+                        elif ctype.startswith("text/") or (
+                            is_webdav(op) and (ctype == "application/xml" or ctype.endswith("+xml"))
+                        ):
                             value = raw.decode("utf-8", errors="replace")
                         else:
                             raise ToolError(
